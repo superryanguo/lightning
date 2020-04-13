@@ -10,11 +10,16 @@ import (
 	"github.com/superryanguo/lightning/website/handler"
 )
 
+const (
+	webPort = ":8081"
+)
+
 func main() {
 	// create new web service
 	service := web.NewService(
 		web.Name("go.micro.lightning.website"),
 		web.Version("latest"),
+		web.Address(webPort),
 	)
 
 	// initialise service
@@ -33,7 +38,7 @@ func main() {
 	//rou.GET("/api/v1.0/emailcode/:email", handler.GetEmailCd)
 	////注册
 	//rou.POST("/api/v1.0/users", handler.PostReg)
-	////获取session
+	//获取session
 	//rou.GET("/api/v1.0/session", handler.GetSession)
 	////登录
 	//rou.POST("/api/v1.0/sessions", handler.PostLogin)
@@ -42,7 +47,7 @@ func main() {
 	////获取用户信息
 	//rou.GET("/api/v1.0/user", handler.GetUserInfo)
 	//获取首页轮播图
-	rou.GET("/api/v1.0/house/index", handler.GetIndex)
+	rou.GET("/api/v1.0/lightning/index", handler.GetIndex)
 	//上传用户头像
 	//rou.POST("/api/v1.0/user/avatar", handler.PostAvatar)
 	////修改用户名
