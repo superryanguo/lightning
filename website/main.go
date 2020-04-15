@@ -39,7 +39,7 @@ func main() {
 	////注册
 	//rou.POST("/api/v1.0/users", handler.PostReg)
 	//获取session
-	//rou.GET("/api/v1.0/session", handler.GetSession)
+	rou.GET("/api/v1.0/session", handler.GetSession)
 	////登录
 	//rou.POST("/api/v1.0/sessions", handler.PostLogin)
 	////登出

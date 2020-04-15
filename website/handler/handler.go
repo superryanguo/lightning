@@ -1,11 +1,14 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/micro/go-micro/service/grpc"
 	"github.com/micro/go-micro/util/log"
+	"github.com/superryanguo/lightning/utils"
 	//website "path/to/service/proto/website"
 )
 
@@ -14,8 +17,8 @@ func GetIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	//创建返回数据map
 	response := map[string]interface{}{
-		"errno":  "0",
-		"errmsg": "Successful",
+		"errno":  utils.RECODE_OK,
+		"errmsg": utils.RecodeText(utils.RECODE_OK),
 	}
 	w.Header().Set("Content-Type", "application/json")
 
@@ -26,7 +29,7 @@ func GetIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 }
 
-/*func GetSession(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func GetSession(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	log.Info("获取Session url：api/v1.0/session")
 
 	//创建服务并初始化
@@ -76,7 +79,7 @@ func GetIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		http.Error(w, err.Error(), 500)
 		return
 	}
-}*/
+}
 
 /*func WebsiteCall(w http.ResponseWriter, r *http.Request) {*/
 //// decode the incoming request as json
