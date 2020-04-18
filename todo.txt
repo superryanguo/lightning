@@ -1,3 +1,5 @@
-1. redis should use microInAction
-2. model data confirm 
+1. redis should use microInAction -- done
+2. model data confirm, use data use orm or set up table as doc? 
 3. use mysql or postgres
+4. clean the fmt to log
+5. clean the version to v2 from v1.8
