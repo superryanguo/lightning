@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"gomicro_warmhome/homeweb/models"
+	"github.com/superryanguo/lightning/models"
 
 	"github.com/garyburd/redigo/redis"
 	log "github.com/micro/go-micro/v2/logger"
@@ -19,6 +19,7 @@ func (e *Session_mgr) GetSession(ctx context.Context, req *session_mgr.Request, 
 	log.Info("获取Session url：api/v1.0/session")
 
 	rsp.Errno = utils.RECODE_OK
+
 	rsp.Errmsg = utils.RecodeText(rsp.Errno)
 
 	bm, err := utils.GetRedisConnector()
