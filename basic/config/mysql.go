@@ -3,6 +3,8 @@ package config
 // MysqlConfig mysql 配置 接口
 type MysqlConfig interface {
 	GetURL() string
+	GetPsw() string
+	GetDbName() string
 	GetEnabled() bool
 	GetMaxIdleConnection() int
 	GetMaxOpenConnection() int
@@ -12,15 +14,24 @@ type MysqlConfig interface {
 // defaultMysqlConfig mysql 配置
 type defaultMysqlConfig struct {
 	URL               string `json:"url"`
+	Psw               string `json:"psw"`
+	DbName            string `json:"dbname"`
 	Enable            bool   `json:"enabled"`
 	MaxIdleConnection int    `json:"maxIdleConnection"`
 	MaxOpenConnection int    `json:"maxOpenConnection"`
-	ConnMaxLifetime int    `json:"connMaxLifetime"`
+	ConnMaxLifetime   int    `json:"connMaxLifetime"`
 }
 
 // URL mysql 连接
 func (m defaultMysqlConfig) GetURL() string {
 	return m.URL
+}
+
+func (m defaultMysqlConfig) GetPsw() string {
+	return m.Psw
+}
+func (m defaultMysqlConfig) GetDbName() string {
+	return m.DbName
 }
 
 // Enabled 激活

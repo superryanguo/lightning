@@ -7,6 +7,7 @@ import (
 
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/superryanguo/lightning/basic/config"
 	"github.com/superryanguo/lightning/utils"
 )
 
@@ -193,7 +194,7 @@ func init() {
 	orm.RegisterDriver("mysql", orm.DRMySQL)
 
 	//connect database   ( 默认参数 ，mysql数据库 ，"数据库的用户名 ：数据库密码@tcp("+数据库地址+":"+数据库端口+")/库名？格式",默认参数）
-	orm.RegisterDataBase("default", "mysql", "root:"+utils.G_mysql_passwd+"@tcp("+utils.G_mysql_addr+":"+utils.G_mysql_port+")/"+utils.G_mysql_dbname+"?charset=utf8", 30)
+	orm.RegisterDataBase("default", "mysql", "root:"+config.GetMysqlConfig().GetPsw()+"@tcp("+config.GetMysqlConfig().GetURL()+")/"+config.GetMysqlConfig().GetDbName()+"?charset=utf8", 30)
 
 	//create tables
 	orm.RegisterModel(new(User), new(House), new(Area), new(Facility), new(HouseImage), new(OrderHouse))
