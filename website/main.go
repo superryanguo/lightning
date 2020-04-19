@@ -4,9 +4,13 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/micro/go-micro/util/log"
+	//"github.com/micro/go-micro/util/log"
 
-	"github.com/micro/go-micro/web"
+	log "github.com/micro/go-micro/v2/logger"
+	"github.com/micro/go-micro/v2/web"
+	//"github.com/micro/go-micro/web"
+
+	"github.com/superryanguo/lightning/basic"
 	"github.com/superryanguo/lightning/website/handler"
 )
 
@@ -15,6 +19,7 @@ const (
 )
 
 func main() {
+	basic.Init()
 	// create new web service
 	service := web.NewService(
 		web.Name("go.micro.lightning.website"),

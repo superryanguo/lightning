@@ -6,8 +6,9 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	//"github.com/micro/go-micro/util/log"
 	"github.com/micro/go-micro/service/grpc"
-	"github.com/micro/go-micro/util/log"
+	log "github.com/micro/go-micro/v2/logger"
 	"github.com/superryanguo/lightning/utils"
 	//website "path/to/service/proto/website"
 )
@@ -15,7 +16,7 @@ import (
 func GetIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	log.Info("获取首页轮播 url：api/v1.0/lightning/index")
 
-	//创建返回数据map
+	//创建回数据map
 	response := map[string]interface{}{
 		"errno":  utils.RECODE_OK,
 		"errmsg": utils.RecodeText(utils.RECODE_OK),

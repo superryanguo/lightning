@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	log "github.com/micro/go-micro/logger"
+	log "github.com/micro/go-micro/v2/logger"
 	"github.com/superryanguo/lightning/basic/config"
 )
 

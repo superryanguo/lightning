@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/micro/go-micro/util/log"
 	"github.com/micro/go-micro"
+	"github.com/micro/go-micro/util/log"
+	"github.com/superryanguo/lightning/basic"
 	"github.com/superryanguo/lightning/session_mgr/handler"
 	"github.com/superryanguo/lightning/session_mgr/subscriber"
 
@@ -10,6 +11,7 @@ import (
 )
 
 func main() {
+	basic.Init()
 	// New Service
 	service := micro.NewService(
 		micro.Name("micro.super.lightning.srv.session_mgr"),
