@@ -3,7 +3,7 @@ syntax = "proto3";
 package micro.super.lightning.srv.session_mgr;
 
 service Session_mgr {
-	rpc Call(Request) returns (Response) {}
+	rpc GetSession(Request) returns (Response) {}
 	rpc Stream(StreamingRequest) returns (stream StreamingResponse) {}
 	rpc PingPong(stream Ping) returns (stream Pong) {}
 }
@@ -13,11 +13,13 @@ message Message {
 }
 
 message Request {
-	string name = 1;
+    string SessionId = 1;
 }
 
 message Response {
-	string msg = 1;
+    string Errno = 1;
+    string Errmsg = 2;
+    string Data = 3;
 }
 
 message StreamingRequest {

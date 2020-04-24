@@ -3,7 +3,7 @@ package handler
 import (
 	"context"
 
-	"github.com/micro/go-micro/util/log"
+	log "github.com/micro/go-micro/v2/logger"
 
 	user_srv "github.com/superryanguo/lightning/user_srv/proto/user_srv"
 )

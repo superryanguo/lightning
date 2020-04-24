@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/micro/go-micro/util/log"
-	"github.com/micro/go-micro"
+	"github.com/micro/go-micro/v2"
+	log "github.com/micro/go-micro/v2/logger"
 	"github.com/superryanguo/lightning/user_srv/handler"
 	"github.com/superryanguo/lightning/user_srv/subscriber"
 

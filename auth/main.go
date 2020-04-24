@@ -24,7 +24,7 @@ func main() {
 
 	// 新建服务
 	service := micro.NewService(
-		micro.Name("mu.micro.book.srv.auth"),
+		micro.Name("micro.super.lightning.srv.auth"),
 		micro.Registry(micReg),
 		micro.Version("latest"),
 	)

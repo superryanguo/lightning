@@ -2,7 +2,8 @@ package subscriber
 
 import (
 	"context"
-	"github.com/micro/go-micro/util/log"
+
+	log "github.com/micro/go-micro/v2/logger"
 
 	session_mgr "github.com/superryanguo/lightning/session_mgr/proto/session_mgr"
 )

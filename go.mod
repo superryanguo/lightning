@@ -9,10 +9,11 @@ require (
 	github.com/garyburd/redigo v1.6.0 // indirect
 	github.com/go-redis/redis v6.15.7+incompatible
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/golang/protobuf v1.3.5
+	github.com/golang/protobuf v1.4.0
+	github.com/gorilla/sessions v1.2.0 // indirect
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/micro-in-cn/tutorials/microservice-in-micro v0.0.0-20200415151649-6b5af13cdcea
 	github.com/micro/cli/v2 v2.1.2
-	github.com/micro/go-micro v1.18.0
 	github.com/micro/go-micro/v2 v2.5.0
+	google.golang.org/protobuf v1.21.0
 )

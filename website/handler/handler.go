@@ -7,11 +7,25 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	//"github.com/micro/go-micro/util/log"
-	"github.com/micro/go-micro/service/grpc"
+
 	log "github.com/micro/go-micro/v2/logger"
 	"github.com/superryanguo/lightning/utils"
+
 	//website "path/to/service/proto/website"
+	"github.com/micro/go-micro/v2/client"
+	auth "github.com/superryanguo/lightning/auth/proto/auth"
+	sm "github.com/superryanguo/lightning/session_mgr/proto/session_mgr"
 )
+
+var (
+	smClient   sm.SessionMgrService
+	authClient auth.Service
+)
+
+func Init() {
+	smClient = sm.NewSessionMgrService("micro.super.lightning.srv.session_mgr", client.DefaultClient)
+	authClient = auth.NewService("micro.super.lightning.srv.auth", client.DefaultClient)
+}
 
 func GetIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	log.Info("获取首页轮播 url：api/v1.0/lightning/index")
@@ -33,13 +47,6 @@ func GetIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 func GetSession(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	log.Info("获取Session url：api/v1.0/session")
 
-	//创建服务并初始化
-	server := grpc.NewService()
-	server.Init()
-
-	// call the backend service
-	exampleClient := GETSESSION.NewExampleService("go.micro.srv.GetSession", server.Client())
-
 	//获取cookie
 	userlogin, err := r.Cookie("userlogin")
 	//未登录或登录超时
@@ -57,7 +64,7 @@ func GetSession(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		return
 	}
 	//如果cookie有值就发送到服务端
-	rsp, err := exampleClient.GetSession(context.TODO(), &GETSESSION.Request{
+	rsp, err := smClient.GetSession(context.TODO(), &sm.Request{
 		SessionId: userlogin.Value,
 	})
 	if err != nil {
