@@ -12,7 +12,6 @@ require (
 	github.com/golang/protobuf v1.4.0
 	github.com/gorilla/sessions v1.2.0 // indirect
 	github.com/julienschmidt/httprouter v1.3.0
-	github.com/micro-in-cn/tutorials/microservice-in-micro v0.0.0-20200415151649-6b5af13cdcea
 	github.com/micro/cli/v2 v2.1.2
 	github.com/micro/go-micro/v2 v2.5.0
 	google.golang.org/protobuf v1.21.0

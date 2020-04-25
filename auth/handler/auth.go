@@ -4,9 +4,9 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/micro-in-cn/tutorials/microservice-in-micro/part3/auth/model/access"
-	auth "github.com/micro-in-cn/tutorials/microservice-in-micro/part3/auth/proto/auth"
 	log "github.com/micro/go-micro/v2/logger"
+	"github.com/superryanguo/lightning/auth/model/access"
+	auth "github.com/superryanguo/lightning/auth/proto/auth"
 )
 
 var (

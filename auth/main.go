@@ -3,16 +3,16 @@ package main
 import (
 	"fmt"
 
-	"github.com/micro-in-cn/tutorials/microservice-in-micro/part3/auth/handler"
-	"github.com/micro-in-cn/tutorials/microservice-in-micro/part3/auth/model"
-	s "github.com/micro-in-cn/tutorials/microservice-in-micro/part3/auth/proto/auth"
-	"github.com/micro-in-cn/tutorials/microservice-in-micro/part3/basic"
-	"github.com/micro-in-cn/tutorials/microservice-in-micro/part3/basic/config"
 	"github.com/micro/cli/v2"
 	"github.com/micro/go-micro/v2"
 	log "github.com/micro/go-micro/v2/logger"
 	"github.com/micro/go-micro/v2/registry"
 	"github.com/micro/go-micro/v2/registry/etcd"
+	"github.com/superryanguo/lightning/auth/handler"
+	"github.com/superryanguo/lightning/auth/model"
+	s "github.com/superryanguo/lightning/auth/proto/auth"
+	"github.com/superryanguo/lightning/basic"
+	"github.com/superryanguo/lightning/basic/config"
 )
 
 func main() {
