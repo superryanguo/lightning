@@ -9,6 +9,7 @@ data
 *.swo
 website/website
 auth/auth
+session_mgr/session_mgr
 
 # Test binary, build with `go test -c`
 *.test

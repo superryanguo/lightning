@@ -15,7 +15,7 @@ var (
 	ExpiredDate = 3600 * 24 * 30 * time.Second
 )
 
-func saveToCache(key string, val []byte) (err error) {
+func SaveToCache(key string, val []byte) (err error) {
 
 	if err = ca.Set(key, val, ExpiredDate).Err(); err != nil {
 		return fmt.Errorf("[saveToCache] 保存到缓存发生错误，err:" + err.Error())
@@ -23,17 +23,17 @@ func saveToCache(key string, val []byte) (err error) {
 	return
 }
 
-func delFromCache(key string) (err error) {
+func DelFromCache(key string) (err error) {
 	if err = ca.Del(key).Err(); err != nil {
 		return fmt.Errorf("[delFromCache] 清空缓存发生错误，err:" + err.Error())
 	}
 	return
 }
 
-func getFromCache(key string) ([]byte, error) {
+func GetFromCache(key string) (string, error) {
 	val, err := ca.Get(key).Result()
 	if err != nil {
-		return nil, fmt.Errorf("[getFromCache]不存在 %s", err)
+		return "", fmt.Errorf("[getFromCache]不存在 %s", err)
 	}
 
 	return val, nil
@@ -43,8 +43,5 @@ func Init() {
 	m.Lock()
 	defer m.Unlock()
 
-	if s != nil {
-		return
-	}
 	ca = redis.GetRedis()
 }

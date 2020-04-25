@@ -1,5 +1,9 @@
 package utils
 
+var (
+	G_img_addr string //图片服务器地址
+)
+
 const (
 	RECODE_OK         = "0"
 	RECODE_DBERR      = "4001"
@@ -48,4 +52,10 @@ func RecodeText(code string) string {
 		return str
 	}
 	return recodeText[RECODE_UNKNOWERR]
+}
+func AddDomain2Url(url string) (domain_url string) {
+	//TODO: init the G_img_addr with the config read method
+	domain_url = "http://" + G_img_addr + "/" + url
+
+	return domain_url
 }

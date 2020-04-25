@@ -32,7 +32,7 @@ func main() {
 	)
 
 	// Register Handler
-	session_mgr.RegisterSession_mgrHandler(service.Server(), new(handler.Session_mgr))
+	session_mgr.RegisterSessionMgrHandler(service.Server(), new(handler.Session_mgr))
 
 	// Register Struct as Subscriber
 	//micro.RegisterSubscriber("micro.super.lightning.srv.session_mgr", service.Server(), new(subscriber.Session_mgr))

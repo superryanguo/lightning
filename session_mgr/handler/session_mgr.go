@@ -2,8 +2,10 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 
 	log "github.com/micro/go-micro/v2/logger"
+	"github.com/superryanguo/lightning/models"
 	"github.com/superryanguo/lightning/session_mgr/model"
 	"github.com/superryanguo/lightning/utils"
 
@@ -11,6 +13,10 @@ import (
 )
 
 type Session_mgr struct{}
+
+func Init() {
+	//TODO: do something here?
+}
 
 func (e *Session_mgr) GetSession(ctx context.Context, req *session_mgr.Request, rsp *session_mgr.Response) error {
 	log.Info("获取Session url：api/v1.0/session")
@@ -20,25 +26,31 @@ func (e *Session_mgr) GetSession(ctx context.Context, req *session_mgr.Request, 
 
 	log.Info(req.SessionId)
 	userInfo, err := model.GetFromCache(req.SessionId)
-	//user := models.User{}
-	//err = json.Unmarshal(userInfo, &user)
 	if err != nil {
 		log.Info("No session data in cache")
 		rsp.Errno = utils.RECODE_DATAERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)
 		return nil
 	}
-	//rsp.Data = user.Name
+	user := models.User{}
+	err = json.Unmarshal([]byte(userInfo), &user)
+	if err != nil {
+		log.Info("Data unmarshal json error")
+		rsp.Errno = utils.RECODE_DATAERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+	rsp.Data = user.Name
 
 	return nil
 }
 
 // Stream is a server side stream handler called via client.Stream or the generated client code
-func (e *Session_mgr) Stream(ctx context.Context, req *session_mgr.StreamingRequest, stream session_mgr.Session_mgr_StreamStream) error {
-	log.Logf("Received Session_mgr.Stream request with count: %d", req.Count)
+func (e *Session_mgr) Stream(ctx context.Context, req *session_mgr.StreamingRequest, stream session_mgr.SessionMgr_StreamStream) error {
+	//log.Logf("Received Session_mgr.Stream request with count: %d", req.Count)
 
 	for i := 0; i < int(req.Count); i++ {
-		log.Logf("Responding: %d", i)
+		//log.Logf("Responding: %d", i)
 		if err := stream.Send(&session_mgr.StreamingResponse{
 			Count: int64(i),
 		}); err != nil {
@@ -50,13 +62,13 @@ func (e *Session_mgr) Stream(ctx context.Context, req *session_mgr.StreamingRequ
 }
 
 // PingPong is a bidirectional stream handler called via client.Stream or the generated client code
-func (e *Session_mgr) PingPong(ctx context.Context, stream session_mgr.Session_mgr_PingPongStream) error {
+func (e *Session_mgr) PingPong(ctx context.Context, stream session_mgr.SessionMgr_PingPongStream) error {
 	for {
 		req, err := stream.Recv()
 		if err != nil {
 			return err
 		}
-		log.Logf("Got ping %v", req.Stroke)
+		//log.Logf("Got ping %v", req.Stroke)
 		if err := stream.Send(&session_mgr.Pong{Stroke: req.Stroke}); err != nil {
 			return err
 		}
