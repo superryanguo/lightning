@@ -10,18 +10,35 @@ services:
       - $PWD/redis-data:/var/lib/redis
       - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
     networks:
-      - outlet-net
+      - node-net
     ports:
       - "6379:6379"
     command: redis-server --requirepass sOmE_sEcUrE_pAsS
-    networks:
-      node_net:
-        ipv4_address: 172.28.1.4
 
-# networking for the Redis container
+  datamysql:
+    #image: "docker.io/mysql:latest"
+    image: mysql:5.7
+    network_mode: "host"
+    restart: always
+    container_name: "datamysql"
+    environment:
+      #MYSQL_DATABASE: wordpress
+      MYSQL_ROOT_PASSWORD: "yourpassword"
+      MYSQL_USER: 'test'
+      MYSQL_PASS: 'yourpassword'
+    volumes:
+      - "./db:/var/lib/mysql"
+      - "./conf/my.cnf:/etc/my.cnf"
+      - "./init:/docker-entrypoint-initdb.d/"
+    networks:
+      - node-net
+    ports:
+      - "3306:3306"
+
 networks:
-  node_net:
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.28.0.0/16
+  node-net:
+    name: node-net
+  outlet-net:
+    name: outlet-net
+  outlet-backend-net:
+    name: outlet-backend-net
