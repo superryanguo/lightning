@@ -8,7 +8,7 @@ services:
       - REDIS_REPLICATION_MODE=master
     volumes:
       - "./db/redis-data:/var/lib/redis"
-      - "./conf/redis.conf:/usr/local/etc/redis/redis.conf"
+      - "./models/conf/redis.conf:/usr/local/etc/redis/redis.conf"
     networks:
       - node-net
     ports:
@@ -29,8 +29,8 @@ services:
       MYSQL_PASS: 'yourpassword'
     volumes:
       - "./db/mysql:/var/lib/mysql"
-      - "./conf/my.cnf:/etc/my.cnf"
-      - "./init:/docker-entrypoint-initdb.d/"
+      - "./models/conf/my.cnf:/etc/my.cnf"
+      - "./models/init:/docker-entrypoint-initdb.d/"
     #networks:
       #- node-net
     ports:
