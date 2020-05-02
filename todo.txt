@@ -1,10 +1,10 @@
-1. redis should use microInAction -- done
-2. model data confirm, use data use orm or set up table as doc? how to init the models data?done
+1. redis should use microInAction -- -done
+2. model data confirm, use data use orm or set up table as doc? how to init the models data?-done
 3. use mysql or postgres
 4. clean the fmt to log
-5. clean the version to v2 from v1.8, first correct local to v2 in code, then try a micro new? it will auto change to v2?! A:because the micro is v1.8
+5. clean the version to v2 from v1.8, first correct local to v2 in code, then try a micro new? it will auto change to v2?! A:because the micro is v1.8--done
 6. use v2 micro to replace the module 1.8 one by one, and make sure each module can work, first website/basic log ok, then moduels, then session-mgr
-7. use docker and compose to build a usage with redis, mysql/postgress database --- do it first?!done
+7. use docker and compose to build a usage with redis, mysql/postgress database --- do it first?!-done
 
 issues:
 a. Q:models and basic/db, how different service  use the same init database-mysql in the basic?!
