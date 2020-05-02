@@ -5,7 +5,7 @@ This is the Session_mgr service
 Generated with
 
 ```
-micro new github.com/superryanguo/lightning/session_mgr --namespace=micro.super.lightning --type=srv
+micro new session_mgr --namespace=micro.super.lightning --type=service
 ```
 
 ## Getting Started
@@ -16,8 +16,8 @@ micro new github.com/superryanguo/lightning/session_mgr --namespace=micro.super.
 
 ## Configuration
 
-- FQDN: micro.super.lightning.srv.session_mgr
-- Type: srv
+- FQDN: micro.super.lightning.service.session_mgr
+- Type: service
 - Alias: session_mgr
 
 ## Dependencies
@@ -46,7 +46,7 @@ make build
 
 Run the service
 ```
-./session_mgr-srv
+./session_mgr-service
 ```
 
 Build a docker image

@@ -1,3 +1,3 @@
 FROM alpine
-ADD session_mgr-srv /session_mgr-srv
-ENTRYPOINT [ "/session_mgr-srv" ]
+ADD session_mgr-service /session_mgr-service
+ENTRYPOINT [ "/session_mgr-service" ]

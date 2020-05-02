@@ -11,11 +11,11 @@ import (
 type Session_mgr struct{}
 
 func (e *Session_mgr) Handle(ctx context.Context, msg *session_mgr.Message) error {
-	log.Log("Handler Received message: ", msg.Say)
+	log.Info("Handler Received message: ", msg.Say)
 	return nil
 }
 
 func Handler(ctx context.Context, msg *session_mgr.Message) error {
-	log.Log("Function Received message: ", msg.Say)
+	log.Info("Function Received message: ", msg.Say)
 	return nil
 }

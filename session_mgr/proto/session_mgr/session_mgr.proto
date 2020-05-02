@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package micro.super.lightning.srv.session_mgr;
+package micro.super.lightning.service.session_mgr;
 
 service Session_mgr {
 	rpc GetSession(Request) returns (Response) {}
@@ -13,7 +13,7 @@ message Message {
 }
 
 message Request {
-    string SessionId = 1;
+  string SessionId = 1;
 }
 
 message Response {
