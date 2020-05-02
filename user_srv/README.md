@@ -5,7 +5,7 @@ This is the User_srv service
 Generated with
 
 ```
-micro new github.com/superryanguo/lightning/user_srv --namespace=micro.super.lightning --type=srv
+micro new user_srv --namespace=micro.super.lightning --type=service
 ```
 
 ## Getting Started
@@ -16,8 +16,8 @@ micro new github.com/superryanguo/lightning/user_srv --namespace=micro.super.lig
 
 ## Configuration
 
-- FQDN: micro.super.lightning.srv.user_srv
-- Type: srv
+- FQDN: micro.super.lightning.service.user_srv
+- Type: service
 - Alias: user_srv
 
 ## Dependencies
@@ -46,7 +46,7 @@ make build
 
 Run the service
 ```
-./user_srv-srv
+./user_srv-service
 ```
 
 Build a docker image

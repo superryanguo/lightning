@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package micro.super.lightning.srv.user_srv;
+package micro.super.lightning.service.user_srv;
 
 service User_srv {
 	rpc Call(Request) returns (Response) {}

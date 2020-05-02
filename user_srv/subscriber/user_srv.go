@@ -11,11 +11,11 @@ import (
 type User_srv struct{}
 
 func (e *User_srv) Handle(ctx context.Context, msg *user_srv.Message) error {
-	log.Log("Handler Received message: ", msg.Say)
+	log.Info("Handler Received message: ", msg.Say)
 	return nil
 }
 
 func Handler(ctx context.Context, msg *user_srv.Message) error {
-	log.Log("Function Received message: ", msg.Say)
+	log.Info("Function Received message: ", msg.Say)
 	return nil
 }

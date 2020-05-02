@@ -12,7 +12,7 @@ import (
 func main() {
 	// New Service
 	service := micro.NewService(
-		micro.Name("micro.super.lightning.srv.user_srv"),
+		micro.Name("micro.super.lightning.service.user_srv"),
 		micro.Version("latest"),
 	)
 
@@ -20,13 +20,10 @@ func main() {
 	service.Init()
 
 	// Register Handler
-	user_srv.RegisterUser_srvHandler(service.Server(), new(handler.User_srv))
+	user_srv.RegisterUserSrvHandler(service.Server(), new(handler.User_srv))
 
 	// Register Struct as Subscriber
-	micro.RegisterSubscriber("micro.super.lightning.srv.user_srv", service.Server(), new(subscriber.User_srv))
-
-	// Register Function as Subscriber
-	micro.RegisterSubscriber("micro.super.lightning.srv.user_srv", service.Server(), subscriber.Handler)
+	micro.RegisterSubscriber("micro.super.lightning.service.user_srv", service.Server(), new(subscriber.User_srv))
 
 	// Run service
 	if err := service.Run(); err != nil {

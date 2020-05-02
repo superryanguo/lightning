@@ -9,6 +9,7 @@ data
 *.swo
 website/website
 auth/auth
+user_srv/user_srv
 db/*
 session_mgr/session_mgr
 
