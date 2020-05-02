@@ -5,7 +5,7 @@ This is the Website service
 Generated with
 
 ```
-micro new github.com/superryanguo/lightning/website --namespace=go.micro --type=web
+micro new website --namespace=micro.super.lightning --type=web
 ```
 
 ## Getting Started
@@ -16,7 +16,7 @@ micro new github.com/superryanguo/lightning/website --namespace=go.micro --type=
 
 ## Configuration
 
-- FQDN: go.micro.web.website
+- FQDN: micro.super.lightning.web.website
 - Type: web
 - Alias: website
 

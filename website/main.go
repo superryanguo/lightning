@@ -4,12 +4,8 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	//"github.com/micro/go-micro/util/log"
-
 	log "github.com/micro/go-micro/v2/logger"
 	"github.com/micro/go-micro/v2/web"
-	//"github.com/micro/go-micro/web"
-
 	"github.com/superryanguo/lightning/basic"
 	"github.com/superryanguo/lightning/website/handler"
 )
@@ -22,7 +18,7 @@ func main() {
 	basic.Init()
 	// create new web service
 	service := web.NewService(
-		web.Name("go.micro.lightning.website"),
+		web.Name("micro.super.lightning.web.website"),
 		web.Version("latest"),
 		web.Address(webPort),
 	)
@@ -32,11 +28,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// register call handler
-	//service.HandleFunc("/website/call", handler.WebsiteCall)
-
 	rou := httprouter.New()
-	//映射静态页面
 	rou.NotFound = http.FileServer(http.Dir("html"))
 	//rou.GET("/api/v1.0/imagecode/:uuid", handler.GetImageCd)
 	////获取邮箱验证码
@@ -65,6 +57,10 @@ func main() {
 	// register html handler
 	//service.Handle("/", http.FileServer(http.Dir("html")))
 	service.Handle("/", rou)
+
+	// register call handler
+	//service.HandleFunc("/website/call", handler.WebsiteCall)
+
 	// run service
 	if err := service.Run(); err != nil {
 		log.Fatal(err)

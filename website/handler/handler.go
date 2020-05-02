@@ -6,15 +6,11 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	//"github.com/micro/go-micro/util/log"
-
-	log "github.com/micro/go-micro/v2/logger"
-	"github.com/superryanguo/lightning/utils"
-
-	//website "path/to/service/proto/website"
 	"github.com/micro/go-micro/v2/client"
+	log "github.com/micro/go-micro/v2/logger"
 	auth "github.com/superryanguo/lightning/auth/proto/auth"
 	sm "github.com/superryanguo/lightning/session_mgr/proto/session_mgr"
+	"github.com/superryanguo/lightning/utils"
 )
 
 var (
@@ -89,7 +85,7 @@ func GetSession(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 }
 
-/*func WebsiteCall(w http.ResponseWriter, r *http.Request) {*/
+//func WebsiteCall(w http.ResponseWriter, r *http.Request) {
 //// decode the incoming request as json
 //var request map[string]interface{}
 //if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -98,7 +94,7 @@ func GetSession(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 //}
 
 //// call the backend service
-//websiteClient := website.NewWebsiteService("go.micro.srv.website", client.DefaultClient)
+//websiteClient := website.NewWebsiteService("micro.super.lightning.service.website", client.DefaultClient)
 //rsp, err := websiteClient.Call(context.TODO(), &website.Request{
 //Name: request["name"].(string),
 //})
@@ -118,4 +114,4 @@ func GetSession(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 //http.Error(w, err.Error(), 500)
 //return
 //}
-/*}*/
+//}
