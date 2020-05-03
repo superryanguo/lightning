@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
+	"github.com/micro/cli"
 	"github.com/micro/cli/v2"
-	"github.com/micro/go-micro/v2"
 	log "github.com/micro/go-micro/v2/logger"
 	"github.com/micro/go-micro/v2/registry"
 	"github.com/micro/go-micro/v2/registry/etcd"
@@ -24,7 +24,7 @@ func main() {
 
 	// 新建服务
 	service := micro.NewService(
-		micro.Name("micro.super.lightning.srv.auth"),
+		micro.Name("micro.super.lightning.service.auth"),
 		micro.Registry(micReg),
 		micro.Version("latest"),
 	)

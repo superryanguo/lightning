@@ -19,12 +19,12 @@ var (
 )
 
 func Init() {
-	smClient = sm.NewSessionMgrService("micro.super.lightning.srv.session_mgr", client.DefaultClient)
-	authClient = auth.NewService("micro.super.lightning.srv.auth", client.DefaultClient)
+	smClient = sm.NewSessionMgrService("micro.super.lightning.service.session_mgr", client.DefaultClient)
+	authClient = auth.NewService("micro.super.lightning.service.auth", client.DefaultClient)
 }
 
 func GetIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	log.Info("获取首页轮播 url：api/v1.0/lightning/index")
+	log.Info("Get the Index html show：api/v1.0/lightning/index")
 
 	//创建回数据map
 	response := map[string]interface{}{
@@ -41,12 +41,13 @@ func GetIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 func GetSession(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	log.Info("获取Session url：api/v1.0/session")
+	log.Info("Retrieve the session url：api/v1.0/session")
 
 	//获取cookie
 	userlogin, err := r.Cookie("userlogin")
 	//未登录或登录超时
 	if err != nil || "" == userlogin.Value {
+		log.Debug("no login info found...")
 		response := map[string]interface{}{
 			"errno":  utils.RECODE_SESSIONERR,
 			"errmsg": utils.RecodeText(utils.RECODE_SESSIONERR),
