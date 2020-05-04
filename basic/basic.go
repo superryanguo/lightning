@@ -8,6 +8,6 @@ import (
 
 func Init() {
 	config.Init()
-	db.Init()
 	redis.Init()
+	db.Init()
 }

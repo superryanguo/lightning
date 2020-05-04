@@ -23,7 +23,7 @@ func Init() {
 	var err error
 
 	if inited {
-		err = fmt.Errorf("[Init] db 已经初始化过")
+		err = fmt.Errorf("[Init] db already init")
 		log.Error(err)
 		return
 	}

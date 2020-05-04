@@ -13,8 +13,8 @@ services:
       - node-net
     ports:
       - "6379:6379"
-    command: redis-server
-    #command: redis-server --requirepass sOmE_sEcUrE_pAsS
+    #command: redis-server
+    command: redis-server --requirepass sOmE_sEcUrE_pAsS
 
   datamysql:
     #image: "docker.io/mysql:latest"

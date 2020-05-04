@@ -20,7 +20,7 @@ func Init() {
 	defer m.Unlock()
 
 	if inited {
-		log.Info("已经初始化过Redis...")
+		log.Info("Already inited Redis...")
 		return
 	}
 
@@ -28,29 +28,30 @@ func Init() {
 
 	// 打开才加载
 	if redisConfig != nil && redisConfig.GetEnabled() {
-		log.Info("初始化Redis...")
+		log.Info("Init Redis...")
 
 		// 加载哨兵模式
 		if redisConfig.GetSentinelConfig() != nil && redisConfig.GetSentinelConfig().GetEnabled() {
-			log.Info("初始化Redis，哨兵模式...")
+			log.Info("Init Redis in SentinelMode...")
 			initSentinel(redisConfig)
 		} else { // 普通模式
-			log.Info("初始化Redis，普通模式...")
+			log.Info("Init Redis in NormalMode...")
 			initSingle(redisConfig)
 		}
 
-		log.Info("初始化Redis，检测连接...")
+		log.Info("Redis checking connection...")
 
 		pong, err := client.Ping().Result()
 		if err != nil {
 			log.Fatal(err.Error())
 		}
 
-		log.Info("初始化Redis，检测连接Ping.")
-		log.Info("初始化Redis，检测连接Ping..")
-		log.Info("初始化Redis，检测连接Ping... %s", pong)
+		log.Info("Redis Ping.")
+		log.Info("Redis Ping..")
+		log.Info("Redis Ping... %s", pong)
 	}
 	inited = true
+	log.Info("Redis connected successfully!")
 }
 
 // GetRedis 获取redis

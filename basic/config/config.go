@@ -34,7 +34,7 @@ func Init() {
 	defer m.Unlock()
 
 	if inited {
-		log.Infof("[Init] 配置已经初始化过")
+		log.Infof("[Init] Already init the configuration")
 		return
 	}
 
@@ -55,7 +55,7 @@ func Init() {
 		panic(err)
 	}
 
-	log.Infof("[Init] 加载配置文件：path: %s, %+v\n", pt+"/application.yml", profiles)
+	log.Infof("[Init] The configuration files：%s, %+v\n", pt+"/application.yml", profiles)
 
 	// 开始导入新文件
 	if len(profiles.GetInclude()) > 0 {
@@ -65,7 +65,7 @@ func Init() {
 		for i := 0; i < len(include); i++ {
 			filePath := pt + string(filepath.Separator) + defaultConfigFilePrefix + strings.TrimSpace(include[i]) + ".yml"
 
-			log.Infof("[Init] 加载配置文件：path: %s\n", filePath)
+			log.Infof("[Init] loading：%s\n", filePath)
 
 			sources[i] = file.NewSource(file.WithPath(filePath))
 		}
