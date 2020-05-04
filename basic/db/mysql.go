@@ -27,7 +27,9 @@ func initMysql() {
 	//连接数据库闲置断线的问题
 	mysqlDB.SetConnMaxLifetime(time.Second * time.Duration(config.GetMysqlConfig().GetConnMaxLifetime()))
 	// 激活链接
+	log.Info("Connecting the mysql database, PING...")
 	if err = mysqlDB.Ping(); err != nil {
 		log.Fatal(err)
 	}
+	log.Info("PONG... mysql connected successfully...")
 }

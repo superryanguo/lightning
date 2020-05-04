@@ -14,7 +14,7 @@ var (
 	inited bool
 )
 
-// Init 初始化Redis
+// Init make the redis client avaiable
 func Init() {
 	m.Lock()
 	defer m.Unlock()
@@ -54,7 +54,6 @@ func Init() {
 	log.Info("Redis connected successfully!")
 }
 
-// GetRedis 获取redis
 func GetRedis() *redis.Client {
 	return client
 }

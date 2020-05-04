@@ -7,5 +7,5 @@ app:
     timeout: 3000
     sentinel:
       enabled: false
-      master: bookMaster
+      master: dbMaster
       nodes: 127.0.0.1:16379,127.0.0.1:26379,127.0.0.1:36379
