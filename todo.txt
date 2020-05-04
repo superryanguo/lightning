@@ -9,3 +9,6 @@
 issues:
 a. Q:models and basic/db, how different service  use the same init database-mysql in the basic?!
    A:just use the basic.init package and with local yml file to configure
+   mysql -uroot -pyourpassword -P3306
+
+   two kinds of datbase usage
