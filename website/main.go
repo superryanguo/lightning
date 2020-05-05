@@ -7,6 +7,7 @@ import (
 	log "github.com/micro/go-micro/v2/logger"
 	"github.com/micro/go-micro/v2/web"
 	"github.com/superryanguo/lightning/basic"
+	"github.com/superryanguo/lightning/models"
 	"github.com/superryanguo/lightning/website/handler"
 )
 
@@ -16,6 +17,7 @@ const (
 
 func main() {
 	basic.Init()
+	models.Init()
 	// create new web service
 	service := web.NewService(
 		web.Name("micro.super.lightning.web.website"),
