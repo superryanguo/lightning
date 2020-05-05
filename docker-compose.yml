@@ -31,6 +31,7 @@ services:
       - "./db/mysql:/var/lib/mysql"
       - "./models/conf/my.cnf:/etc/my.cnf"
       - "./models/init:/docker-entrypoint-initdb.d/"
+      - "./models/testdata:/home"
     networks:
       - node-net
     ports:
