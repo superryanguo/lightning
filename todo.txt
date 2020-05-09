@@ -6,10 +6,17 @@
 6. use v2 micro to replace the module 1.8 one by one, and make sure each module can work, first website/basic log ok, then moduels, then session-mgr
 7. use docker and compose to build a usage with redis, mysql/postgress database --- do it first?!-done
 
+   two kinds of datbase usage
 issues:
 a. Q:models and basic/db, how different service  use the same init database-mysql in the basic?!
    A:just use the basic.init package and with local yml file to configure
    mysql -uroot -pyourpassword -P3306
    source ./home/data.sql
+use mysql;   SELECT host, user, authentication_string FROM user;
 
-   two kinds of datbase usage
+INSERT INTO user
+          (host, user, authentication_string,
+           select_priv, insert_priv, update_priv)
+           VALUES ('localhost', 'guest',
+           PASSWORD('guest123'), 'Y', 'Y', 'Y');
+CREATE TABLE table_name (column_name column_type);
