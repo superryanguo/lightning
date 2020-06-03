@@ -40,7 +40,7 @@ func main() {
 	//获取session
 	rou.GET("/api/v1.0/session", handler.GetSession)
 	////登录
-	//rou.POST("/api/v1.0/sessions", handler.PostLogin)
+	rou.POST("/api/v1.0/sessions", handler.PostLogin)
 	////登出
 	//rou.DELETE("/api/v1.0/session", handler.DeleteSession)
 	////获取用户信息

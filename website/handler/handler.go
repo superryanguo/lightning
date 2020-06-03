@@ -4,22 +4,26 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"reflect"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/micro/go-micro/v2/client"
 	log "github.com/micro/go-micro/v2/logger"
 	auth "github.com/superryanguo/lightning/auth/proto/auth"
 	sm "github.com/superryanguo/lightning/session_mgr/proto/session_mgr"
+	user "github.com/superryanguo/lightning/user_srv/proto/user_srv"
 	"github.com/superryanguo/lightning/utils"
 )
 
 var (
 	smClient   sm.SessionMgrService
+	userClient user.UserSrvService
 	authClient auth.Service
 )
 
 func Init() {
 	smClient = sm.NewSessionMgrService("micro.super.lightning.service.session_mgr", client.DefaultClient)
+	userClient = user.NewUserSrvService("micro.super.lightning.service.user_srv", client.DefaultClient)
 	authClient = auth.NewService("micro.super.lightning.service.auth", client.DefaultClient)
 }
 
@@ -84,6 +88,68 @@ func GetSession(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		http.Error(w, err.Error(), 500)
 		return
 	}
+}
+
+func PostLogin(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	log.Info("PostLoginInfo to  /api/v1.0/sessions")
+
+	//decode the user input
+	var request map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	for key, value := range request {
+		log.Debug(key, value, reflect.TypeOf(value))
+	}
+
+	if request["email"] == "" || request["password"] == "" {
+		resp := map[string]interface{}{
+			"errno":  utils.RECODE_NODATA,
+			"errmsg": "empty email or password",
+		}
+		w.Header().Set("Content-type", "application/json")
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			http.Error(w, err.Error(), 503)
+			log.Info(err)
+			return
+		}
+		log.Info("empty email or password")
+		return
+	}
+
+	// call the backend service
+	rsp, err := userClient.PostLogin(context.TODO(), &user.Request{
+		Email:    request["email"].(string),
+		Password: request["password"].(string),
+	})
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	//读取cookie
+	cookie, err := r.Cookie("userlogin")
+	//如果读取失败或者cookie中的value不存在则创建cookie
+	if err != nil || "" == cookie.Value {
+		cookie := http.Cookie{Name: "userlogin", Value: rsp.SessionId, Path: "/", MaxAge: 600}
+		http.SetCookie(w, &cookie)
+	}
+
+	// we want to augment the response
+	response := map[string]interface{}{
+		"errno":  rsp.Errno,
+		"errmsg": rsp.Errmsg,
+	}
+	w.Header().Set("Content-type", "application/json")
+
+	// encode and write the response as json
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
 }
 
 //func WebsiteCall(w http.ResponseWriter, r *http.Request) {

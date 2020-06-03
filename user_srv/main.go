@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/micro/go-micro/v2"
 	log "github.com/micro/go-micro/v2/logger"
+	"github.com/superryanguo/lightning/basic"
 	"github.com/superryanguo/lightning/user_srv/handler"
 	"github.com/superryanguo/lightning/user_srv/subscriber"
 
@@ -10,6 +11,7 @@ import (
 )
 
 func main() {
+	basic.Init()
 	// New Service
 	service := micro.NewService(
 		micro.Name("micro.super.lightning.service.user_srv"),

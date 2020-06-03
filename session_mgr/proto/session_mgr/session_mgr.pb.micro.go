@@ -43,6 +43,7 @@ func NewSessionMgrEndpoints() []*api.Endpoint {
 
 type SessionMgrService interface {
 	GetSession(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
+	SaveSession(ctx context.Context, in *Session, opts ...client.CallOption) (*Response, error)
 	Stream(ctx context.Context, in *StreamingRequest, opts ...client.CallOption) (SessionMgr_StreamService, error)
 	PingPong(ctx context.Context, opts ...client.CallOption) (SessionMgr_PingPongService, error)
 }
@@ -61,6 +62,16 @@ func NewSessionMgrService(name string, c client.Client) SessionMgrService {
 
 func (c *sessionMgrService) GetSession(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error) {
 	req := c.c.NewRequest(c.name, "SessionMgr.GetSession", in)
+	out := new(Response)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sessionMgrService) SaveSession(ctx context.Context, in *Session, opts ...client.CallOption) (*Response, error) {
+	req := c.c.NewRequest(c.name, "SessionMgr.SaveSession", in)
 	out := new(Response)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -173,6 +184,7 @@ func (x *sessionMgrServicePingPong) Recv() (*Pong, error) {
 
 type SessionMgrHandler interface {
 	GetSession(context.Context, *Request, *Response) error
+	SaveSession(context.Context, *Session, *Response) error
 	Stream(context.Context, *StreamingRequest, SessionMgr_StreamStream) error
 	PingPong(context.Context, SessionMgr_PingPongStream) error
 }
@@ -180,6 +192,7 @@ type SessionMgrHandler interface {
 func RegisterSessionMgrHandler(s server.Server, hdlr SessionMgrHandler, opts ...server.HandlerOption) error {
 	type sessionMgr interface {
 		GetSession(ctx context.Context, in *Request, out *Response) error
+		SaveSession(ctx context.Context, in *Session, out *Response) error
 		Stream(ctx context.Context, stream server.Stream) error
 		PingPong(ctx context.Context, stream server.Stream) error
 	}
@@ -196,6 +209,10 @@ type sessionMgrHandler struct {
 
 func (h *sessionMgrHandler) GetSession(ctx context.Context, in *Request, out *Response) error {
 	return h.SessionMgrHandler.GetSession(ctx, in, out)
+}
+
+func (h *sessionMgrHandler) SaveSession(ctx context.Context, in *Session, out *Response) error {
+	return h.SessionMgrHandler.SaveSession(ctx, in, out)
 }
 
 func (h *sessionMgrHandler) Stream(ctx context.Context, stream server.Stream) error {

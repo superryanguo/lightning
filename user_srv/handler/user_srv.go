@@ -2,18 +2,66 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 
+	"github.com/astaxie/beego/orm"
 	log "github.com/micro/go-micro/v2/logger"
+	"github.com/superryanguo/lightning/utils"
 
+	"github.com/superryanguo/lightning/basic/model"
+	"github.com/superryanguo/lightning/models"
 	user_srv "github.com/superryanguo/lightning/user_srv/proto/user_srv"
 )
 
 type User_srv struct{}
 
-// Call is a single request handler called via client.Call or the generated client code
-func (e *User_srv) Call(ctx context.Context, req *user_srv.Request, rsp *user_srv.Response) error {
-	log.Info("Received User_srv.Call request")
-	rsp.Msg = "Hello " + req.Name
+func (e *User_srv) PostLogin(ctx context.Context, req *user_srv.Request, rsp *user_srv.Response) error {
+	log.Info("ServicePostLogin  /api/v1.0/sessions")
+
+	rsp.Errno = utils.RECODE_OK
+	rsp.Errmsg = utils.RecodeText(rsp.Errno)
+	//database query
+	var user models.User
+	o := orm.NewOrm()
+	qs := o.QueryTable("user")
+	err := qs.Filter("email", req.Email).One(&user)
+	if err != nil {
+		rsp.Errno = utils.RECODE_DBERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+	//compare the password
+	pwd_hash := utils.Sha256Encode(req.Password)
+	if pwd_hash != user.Password_hash {
+		rsp.Errno = utils.RECODE_PWDERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+
+	//bm, err := utils.GetRedisConnector()
+	//if err != nil {
+	//log.Debug("redis connection failure in postlogin", err)
+	//rsp.Errno = utils.RECODE_DBERR
+	//rsp.Errmsg = utils.RecodeText(rsp.Errno)
+	//return nil
+	//}
+
+	//TODO: should put this part into the session mgr
+	sessionId := utils.Sha256Encode(pwd_hash)
+	rsp.SessionId = sessionId
+	user.Password_hash = ""
+	userInfo, _ := json.Marshal(user)
+	//bm.Put(sessionId, userInfo, time.Second*600)
+
+	//ca := redis.GetRedis()
+	err = model.SaveToCache(sessionId, userInfo)
+	if err != nil {
+		log.Debug("redis save sessionid failure in postlogin", err)
+		rsp.Errno = utils.RECODE_DBERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+
 	return nil
 }
 

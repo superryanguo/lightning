@@ -7,7 +7,8 @@ import (
 
 	"github.com/superryanguo/lightning/basic"
 	"github.com/superryanguo/lightning/session_mgr/handler"
-	"github.com/superryanguo/lightning/session_mgr/model"
+
+	//"github.com/superryanguo/lightning/session_mgr/model"
 	"github.com/superryanguo/lightning/session_mgr/subscriber"
 
 	session_mgr "github.com/superryanguo/lightning/session_mgr/proto/session_mgr"
@@ -26,7 +27,7 @@ func main() {
 	service.Init(
 		micro.Action(func(c *cli.Context) error {
 			// 初始化handler
-			model.Init()
+			//model.Init()
 			// 初始化handler
 			handler.Init()
 

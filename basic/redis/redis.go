@@ -48,7 +48,7 @@ func Init() {
 
 		log.Info("Redis Ping.")
 		log.Info("Redis Ping..")
-		log.Info("Redis Ping... %s", pong)
+		log.Info("Redis Ping...", pong)
 	}
 	inited = true
 	log.Info("Redis connected successfully!")

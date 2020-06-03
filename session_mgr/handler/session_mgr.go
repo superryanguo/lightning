@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 
 	log "github.com/micro/go-micro/v2/logger"
+	"github.com/superryanguo/lightning/basic/model"
 	"github.com/superryanguo/lightning/models"
-	"github.com/superryanguo/lightning/session_mgr/model"
 	"github.com/superryanguo/lightning/utils"
 
 	session_mgr "github.com/superryanguo/lightning/session_mgr/proto/session_mgr"
@@ -19,7 +19,7 @@ func Init() {
 }
 
 func (e *Session_mgr) GetSession(ctx context.Context, req *session_mgr.Request, rsp *session_mgr.Response) error {
-	log.Info("获取Session url：api/v1.0/session")
+	log.Info("GetSession url：api/v1.0/session")
 
 	rsp.Errno = utils.RECODE_OK
 	rsp.Errmsg = utils.RecodeText(rsp.Errno)
@@ -42,6 +42,10 @@ func (e *Session_mgr) GetSession(ctx context.Context, req *session_mgr.Request, 
 	}
 	rsp.Data = user.Name
 
+	return nil
+}
+func (e *Session_mgr) SaveSession(ctx context.Context, ses *session_mgr.Session, rsp *session_mgr.Response) error {
+	log.Info("SaveSession url：api/v1.0/session")
 	return nil
 }
 

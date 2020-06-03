@@ -1,5 +1,10 @@
 package utils
 
+import (
+	"crypto/sha256"
+	"encoding/hex"
+)
+
 var (
 	G_img_addr string //图片服务器地址
 )
@@ -58,4 +63,11 @@ func AddDomain2Url(url string) (domain_url string) {
 	domain_url = "http://" + G_img_addr + "/" + url
 
 	return domain_url
+}
+func Sha256Encode(value string) string {
+	encoder := sha256.New()
+	encoder.Write([]byte(value))
+	hash := encoder.Sum(nil)
+	result := hex.EncodeToString(hash)
+	return string(result)
 }
