@@ -6,6 +6,7 @@
 6. use v2 micro to replace the module 1.8 one by one, and make sure each module can work, first website/basic log ok, then moduels, then session-mgr
 7. use docker and compose to build a usage with redis, mysql/postgress database --- do it first?!-done
 8. SessionManager: no plan to use the gorilla, but use the current, maybe later upgrade to gorilla?!For security issue?
+9. redis/model should make the model name to redis?!
 
    two kinds of datbase usage
 issues:

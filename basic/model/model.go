@@ -1,5 +1,7 @@
 package model
 
+//TODO: make the model name to be redis?!
+
 import (
 	"fmt"
 	"sync"
