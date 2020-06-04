@@ -8,7 +8,7 @@ import (
 	log "github.com/micro/go-micro/v2/logger"
 	"github.com/superryanguo/lightning/utils"
 
-	"github.com/superryanguo/lightning/basic/model"
+	"github.com/superryanguo/lightning/basic/cache"
 	"github.com/superryanguo/lightning/models"
 	user_srv "github.com/superryanguo/lightning/user_srv/proto/user_srv"
 )
@@ -54,7 +54,7 @@ func (e *User_srv) PostLogin(ctx context.Context, req *user_srv.Request, rsp *us
 	//bm.Put(sessionId, userInfo, time.Second*600)
 
 	//ca := redis.GetRedis()
-	err = model.SaveToCache(sessionId, userInfo)
+	err = cache.SaveToCache(sessionId, userInfo)
 	if err != nil {
 		log.Debug("redis save sessionid failure in postlogin", err)
 		rsp.Errno = utils.RECODE_DBERR

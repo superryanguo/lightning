@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 
 	log "github.com/micro/go-micro/v2/logger"
-	"github.com/superryanguo/lightning/basic/model"
+	"github.com/superryanguo/lightning/basic/cache"
 	"github.com/superryanguo/lightning/models"
 	"github.com/superryanguo/lightning/utils"
 
@@ -25,7 +25,7 @@ func (e *Session_mgr) GetSession(ctx context.Context, req *session_mgr.Request, 
 	rsp.Errmsg = utils.RecodeText(rsp.Errno)
 
 	log.Info(req.SessionId)
-	userInfo, err := model.GetFromCache(req.SessionId)
+	userInfo, err := cache.GetFromCache(req.SessionId)
 	if err != nil {
 		log.Info("No session data in cache")
 		rsp.Errno = utils.RECODE_DATAERR
