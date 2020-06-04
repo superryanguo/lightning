@@ -119,7 +119,7 @@ func PostReg(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 
 	// call the backend service
-	rsp, err := userClient.PostLogin(context.TODO(), &user.Request{
+	rsp, err := userClient.PostReg(context.TODO(), &user.Request{
 		Email:     request["email"].(string),
 		Password:  request["password"].(string),
 		EmailCode: request["email_code"].(string),
