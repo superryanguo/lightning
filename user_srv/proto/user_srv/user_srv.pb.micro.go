@@ -43,6 +43,7 @@ func NewUserSrvEndpoints() []*api.Endpoint {
 
 type UserSrvService interface {
 	PostLogin(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
+	PostReg(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
 	Stream(ctx context.Context, in *StreamingRequest, opts ...client.CallOption) (UserSrv_StreamService, error)
 	PingPong(ctx context.Context, opts ...client.CallOption) (UserSrv_PingPongService, error)
 }
@@ -61,6 +62,16 @@ func NewUserSrvService(name string, c client.Client) UserSrvService {
 
 func (c *userSrvService) PostLogin(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error) {
 	req := c.c.NewRequest(c.name, "UserSrv.PostLogin", in)
+	out := new(Response)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userSrvService) PostReg(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error) {
+	req := c.c.NewRequest(c.name, "UserSrv.PostReg", in)
 	out := new(Response)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -173,6 +184,7 @@ func (x *userSrvServicePingPong) Recv() (*Pong, error) {
 
 type UserSrvHandler interface {
 	PostLogin(context.Context, *Request, *Response) error
+	PostReg(context.Context, *Request, *Response) error
 	Stream(context.Context, *StreamingRequest, UserSrv_StreamStream) error
 	PingPong(context.Context, UserSrv_PingPongStream) error
 }
@@ -180,6 +192,7 @@ type UserSrvHandler interface {
 func RegisterUserSrvHandler(s server.Server, hdlr UserSrvHandler, opts ...server.HandlerOption) error {
 	type userSrv interface {
 		PostLogin(ctx context.Context, in *Request, out *Response) error
+		PostReg(ctx context.Context, in *Request, out *Response) error
 		Stream(ctx context.Context, stream server.Stream) error
 		PingPong(ctx context.Context, stream server.Stream) error
 	}
@@ -196,6 +209,10 @@ type userSrvHandler struct {
 
 func (h *userSrvHandler) PostLogin(ctx context.Context, in *Request, out *Response) error {
 	return h.UserSrvHandler.PostLogin(ctx, in, out)
+}
+
+func (h *userSrvHandler) PostReg(ctx context.Context, in *Request, out *Response) error {
+	return h.UserSrvHandler.PostReg(ctx, in, out)
 }
 
 func (h *userSrvHandler) Stream(ctx context.Context, stream server.Stream) error {

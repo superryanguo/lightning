@@ -36,7 +36,7 @@ func main() {
 	////获取邮箱验证码
 	//rou.GET("/api/v1.0/emailcode/:email", handler.GetEmailCd)
 	////注册
-	//rou.POST("/api/v1.0/users", handler.PostReg)
+	rou.POST("/api/v1.0/users", handler.PostReg)
 	//获取session
 	rou.GET("/api/v1.0/session", handler.GetSession)
 	////登录

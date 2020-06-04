@@ -3,8 +3,8 @@ syntax = "proto3";
 package micro.super.lightning.service.user_srv;
 
 service User_srv {
-    rpc PostLogin (Request) returns (Response) {
-    }
+  rpc PostLogin (Request) returns (Response) {}
+  rpc PostReg (Request) returns (Response) {}
 	rpc Stream(StreamingRequest) returns (stream StreamingResponse) {}
 	rpc PingPong(stream Ping) returns (stream Pong) {}
 }
@@ -16,6 +16,7 @@ message Message {
 message Request {
     string Email = 1;
     string Password = 2;
+    string Email_code = 3;
 }
 
 message Response {

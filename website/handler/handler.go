@@ -90,6 +90,65 @@ func GetSession(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 }
 
+func PostReg(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	log.Info("PostReg  /api/v1.0/users")
+
+	var request map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	for key, value := range request {
+		log.Info(key, value, reflect.TypeOf(value))
+	}
+
+	if request["email"] == "" || request["password"] == "" || request["email_code"] == "" {
+		resp := map[string]interface{}{
+			"errno":  utils.RECODE_NODATA,
+			"errmsg": "empty input found",
+		}
+		w.Header().Set("Content-type", "application/json")
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			http.Error(w, err.Error(), 503)
+			log.Info(err)
+			return
+		}
+		log.Info("empty email password or emailcode")
+		return
+	}
+
+	// call the backend service
+	rsp, err := userClient.PostLogin(context.TODO(), &user.Request{
+		Email:     request["email"].(string),
+		Password:  request["password"].(string),
+		EmailCode: request["email_code"].(string),
+	})
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	// we want to augment the response
+	response := map[string]interface{}{
+		"errno":  rsp.Errno,
+		"errmsg": rsp.Errmsg,
+	}
+
+	//读取cookie
+	cookie, err := r.Cookie("userlogin")
+	//如果读取失败或者cookie中的value不存在则创建cookie
+	if err != nil || "" == cookie.Value {
+		cookie := http.Cookie{Name: "userlogin", Value: rsp.SessionId, Path: "/", MaxAge: 600}
+		http.SetCookie(w, &cookie)
+	}
+
+	// encode and write the response as json
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+}
 func PostLogin(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	log.Info("PostLoginInfo to  /api/v1.0/sessions")
 
