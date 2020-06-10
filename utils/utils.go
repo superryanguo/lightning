@@ -3,6 +3,9 @@ package utils
 import (
 	"crypto/sha256"
 	"encoding/hex"
+
+	"github.com/astaxie/beego/utils"
+	log "github.com/micro/go-micro/v2/logger"
 )
 
 var (
@@ -70,4 +73,26 @@ func Sha256Encode(value string) string {
 	hash := encoder.Sum(nil)
 	result := hex.EncodeToString(hash)
 	return string(result)
+}
+func SendEmail(emailTo string, code string) error {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Info("SendEmail Failed")
+		} else {
+			log.Info("SendEmail done")
+		}
+	}()
+	G_email_user := "test"
+	G_email_passwd := "test"
+	config := `{"username":"` + G_email_user + `","password":"` + G_email_passwd + `","host":"smtp.163.com","port":25}`
+	log.Info("SendEmail Config:", config)
+	temail := utils.NewEMail(config)
+	temail.To = []string{emailTo}
+	temail.From = "Ligthning"
+	temail.Subject = "Lightning Register Code"
+	temail.HTML = "Welcome to Lightning, your register code is:" + code
+	_ = temail.Send()
+	//err := temail.Send()
+	return nil //TODO: use right sending mail account
+	//return err
 }

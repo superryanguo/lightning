@@ -4,9 +4,11 @@
 4. clean the fmt to log
 5. clean the version to v2 from v1.8, first correct local to v2 in code, then try a micro new? it will auto change to v2?! A:because the micro is v1.8--done
 6. use v2 micro to replace the module 1.8 one by one, and make sure each module can work, first website/basic log ok, then moduels, then session-mgr
-7. use docker and compose to build a usage with redis, mysql/postgress database --- do it first?!-done
+7. use docker and compose to build a usage with redid, mysql/postgress database --- do it first?!-done
 8. SessionManager: no plan to use the gorilla, but use the current, maybe later upgrade to gorilla?!For security issue?
 9. redis/model should make the model name to redis?! --- done, rename to cache
+10. add the function one by one, tidy the current(login-register-db-web) first!
+11. init with models.Init in each module looks not good, which maybe for the default orm, but not necessary, need a change.
 
    two kinds of datbase usage
 issues:
@@ -15,6 +17,13 @@ a. Q:models and basic/db, how different service  use the same init database-mysq
    mysql -uroot -pyourpassword -P3306
    source ./home/data.sql
 use mysql;   SELECT host, user, authentication_string FROM user;
+
+redis-cli
+AUTH password
+keys *
+get 
+
+abc123
 
 INSERT INTO user
           (host, user, authentication_string,

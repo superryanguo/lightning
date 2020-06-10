@@ -5,12 +5,40 @@ package micro.super.lightning.service.user_srv;
 service User_srv {
   rpc PostLogin (Request) returns (Response) {}
   rpc PostReg (Request) returns (Response) {}
-	rpc Stream(StreamingRequest) returns (stream StreamingResponse) {}
-	rpc PingPong(stream Ping) returns (stream Pong) {}
+  rpc GetImageCd (ImageRequest) returns (ImageResponse) {}
+  rpc GetEmailCd (MailRequest) returns (Response) {}
+  rpc Stream(StreamingRequest) returns (stream StreamingResponse) {}
+  rpc PingPong(stream Ping) returns (stream Pong) {}
 }
 
 message Message {
 	string say = 1;
+}
+
+message MailRequest {
+    string Email = 1;
+    string Uuid = 2;
+    //the code
+    string Text = 3;
+}
+
+message ImageRequest {
+    string uuid = 1;
+}
+
+message ImageResponse {
+    string Errno = 1;
+    string Errmsg = 2;
+    //图片结构信息
+    bytes Pix = 3;
+    //图片跨步
+    int64 Stride = 4;
+    message Point {
+        int64 X = 1;
+        int64 Y = 2;
+    }
+    Point Min = 5;
+    Point Max = 6;
 }
 
 message Request {

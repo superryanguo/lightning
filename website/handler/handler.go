@@ -3,9 +3,12 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"image"
+	"image/png"
 	"net/http"
 	"reflect"
 
+	"github.com/afocus/captcha"
 	"github.com/julienschmidt/httprouter"
 	"github.com/micro/go-micro/v2/client"
 	log "github.com/micro/go-micro/v2/logger"
@@ -27,10 +30,74 @@ func Init() {
 	authClient = auth.NewService("micro.super.lightning.service.auth", client.DefaultClient)
 }
 
-func GetIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	log.Info("Get the Index html show：api/v1.0/lightning/index")
+func GetImageCd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	log.Info("GetImageCd-> url:api/v1.0/imagecode/:uuid")
 
-	//创建回数据map
+	// call the backend service
+	rsp, err := userClient.GetImageCd(context.TODO(), &user.ImageRequest{
+		Uuid: ps.ByName("uuid"),
+	})
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	var img image.RGBA
+	img.Stride = int(rsp.Stride)
+	img.Rect.Min.X = int(rsp.Min.X)
+	img.Rect.Min.Y = int(rsp.Min.Y)
+	img.Rect.Max.X = int(rsp.Max.X)
+	img.Rect.Max.Y = int(rsp.Max.Y)
+	img.Pix = []uint8(rsp.Pix)
+
+	var image captcha.Image
+	image.RGBA = &img
+
+	log.Debug("GetImageCd->send the image to webpage")
+	png.Encode(w, image)
+
+}
+
+func GetEmailCd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	log.Info("GetEmailCd-> url:api/v1.0/emailcode/:email")
+
+	email := ps.ByName("email")
+	log.Info("GetEmailCd->", email)
+
+	log.Info("GetEmailCd->", r.URL.Query())
+	text := r.URL.Query()["text"][0]
+	id := r.URL.Query()["id"][0]
+
+	rsp, err := userClient.GetEmailCd(context.TODO(), &user.MailRequest{
+		Email: email,
+		Uuid:  id,
+		Text:  text,
+	})
+
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	// we want to augment the response
+	response := map[string]interface{}{
+		"errno":  rsp.Errno,
+		"errmsg": rsp.Errmsg,
+	}
+
+	//设置返回格式
+	w.Header().Set("Content-Type", "application/json")
+
+	// encode and write the response as json
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+}
+
+func GetIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	log.Info("GetIndex-> html show api/v1.0/lightning/index")
+
 	response := map[string]interface{}{
 		"errno":  utils.RECODE_OK,
 		"errmsg": utils.RecodeText(utils.RECODE_OK),
@@ -45,13 +112,11 @@ func GetIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 func GetSession(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	log.Info("Retrieve the session url：api/v1.0/session")
+	log.Info("GetSession-> Retrieve the session url：api/v1.0/session")
 
-	//获取cookie
 	userlogin, err := r.Cookie("userlogin")
-	//未登录或登录超时
 	if err != nil || "" == userlogin.Value {
-		log.Debug("no login info found...")
+		log.Debug("GetSession-> no login info found...")
 		response := map[string]interface{}{
 			"errno":  utils.RECODE_SESSIONERR,
 			"errmsg": utils.RecodeText(utils.RECODE_SESSIONERR),
@@ -91,7 +156,7 @@ func GetSession(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 func PostReg(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	log.Info("PostReg  /api/v1.0/users")
+	log.Info("PostReg-> /api/v1.0/users")
 
 	var request map[string]interface{}
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -100,7 +165,7 @@ func PostReg(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 
 	for key, value := range request {
-		log.Info(key, value, reflect.TypeOf(value))
+		log.Info(key, "-", value, "-", reflect.TypeOf(value))
 	}
 
 	if request["email"] == "" || request["password"] == "" || request["email_code"] == "" {
@@ -114,7 +179,7 @@ func PostReg(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 			log.Info(err)
 			return
 		}
-		log.Info("empty email password or emailcode")
+		log.Info("PostReg-> empty email password or emailcode")
 		return
 	}
 
@@ -150,7 +215,7 @@ func PostReg(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 }
 func PostLogin(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	log.Info("PostLoginInfo to  /api/v1.0/sessions")
+	log.Info("PostLogin-> to  /api/v1.0/sessions")
 
 	//decode the user input
 	var request map[string]interface{}
@@ -160,7 +225,7 @@ func PostLogin(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 
 	for key, value := range request {
-		log.Debug(key, value, reflect.TypeOf(value))
+		log.Info(key, "-", value, "-", reflect.TypeOf(value))
 	}
 
 	if request["email"] == "" || request["password"] == "" {
@@ -174,11 +239,12 @@ func PostLogin(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 			log.Info(err)
 			return
 		}
-		log.Info("empty email or password")
+		log.Info("PostLogin-> empty email or password")
 		return
 	}
 
 	// call the backend service
+	log.Debugf("PostLogin-> call the postlogin client=%v", userClient)
 	rsp, err := userClient.PostLogin(context.TODO(), &user.Request{
 		Email:    request["email"].(string),
 		Password: request["password"].(string),
@@ -210,34 +276,3 @@ func PostLogin(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 
 }
-
-//func WebsiteCall(w http.ResponseWriter, r *http.Request) {
-//// decode the incoming request as json
-//var request map[string]interface{}
-//if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-//http.Error(w, err.Error(), 500)
-//return
-//}
-
-//// call the backend service
-//websiteClient := website.NewWebsiteService("micro.super.lightning.service.website", client.DefaultClient)
-//rsp, err := websiteClient.Call(context.TODO(), &website.Request{
-//Name: request["name"].(string),
-//})
-//if err != nil {
-//http.Error(w, err.Error(), 500)
-//return
-//}
-
-//// we want to augment the response
-//response := map[string]interface{}{
-//"msg": rsp.Msg,
-//"ref": time.Now().UnixNano(),
-//}
-
-//// encode and write the response as json
-//if err := json.NewEncoder(w).Encode(response); err != nil {
-//http.Error(w, err.Error(), 500)
-//return
-//}
-//}
