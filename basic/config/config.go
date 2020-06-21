@@ -23,6 +23,7 @@ var (
 	mysqlConfig             defaultMysqlConfig
 	jwtConfig               defaultJwtConfig
 	redisConfig             defaultRedisConfig
+	misConfig               defaultMiscConfig
 	profiles                defaultProfiles
 	m                       sync.RWMutex
 	inited                  bool
@@ -50,14 +51,12 @@ func Init() {
 		panic(err)
 	}
 
-	// 找到需要引入的新配置文件
 	if err = config.Get(defaultRootPath, "profiles").Scan(&profiles); err != nil {
 		panic(err)
 	}
 
 	log.Infof("[Init] The configuration files：%s, %+v\n", pt+"/application.yml", profiles)
 
-	// 开始导入新文件
 	if len(profiles.GetInclude()) > 0 {
 		include := strings.Split(profiles.GetInclude(), ",")
 
@@ -70,38 +69,36 @@ func Init() {
 			sources[i] = file.NewSource(file.WithPath(filePath))
 		}
 
-		// 加载include的文件
 		if err = config.Load(sources...); err != nil {
 			panic(err)
 		}
 	}
 
-	// 赋值
 	config.Get(defaultRootPath, "etcd").Scan(&etcdConfig)
 	config.Get(defaultRootPath, "mysql").Scan(&mysqlConfig)
 	config.Get(defaultRootPath, "redis").Scan(&redisConfig)
 	config.Get(defaultRootPath, "jwt").Scan(&jwtConfig)
+	config.Get(defaultRootPath, "misc").Scan(&misConfig)
 
-	// 标记已经初始化
 	inited = true
 }
 
-// GetMysqlConfig 获取mysql配置
 func GetMysqlConfig() (ret MysqlConfig) {
 	return mysqlConfig
 }
 
-// GetEtcdConfig 获取etcd配置
 func GetEtcdConfig() (ret EtcdConfig) {
 	return etcdConfig
 }
 
-// GetJwtConfig 获取Jwt配置
 func GetJwtConfig() (ret JwtConfig) {
 	return jwtConfig
 }
 
-// GetRedisConfig 获取Redis配置
 func GetRedisConfig() (ret RedisConfig) {
 	return redisConfig
+}
+
+func GetMisconfig() (ret MisConfig) {
+	return misConfig
 }

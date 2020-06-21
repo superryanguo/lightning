@@ -4,12 +4,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 
-	"github.com/astaxie/beego/utils"
 	log "github.com/micro/go-micro/v2/logger"
-)
-
-var (
-	G_img_addr string //图片服务器地址
+	"github.com/superryanguo/lightning/basic/config"
 )
 
 const (
@@ -62,8 +58,7 @@ func RecodeText(code string) string {
 	return recodeText[RECODE_UNKNOWERR]
 }
 func AddDomain2Url(url string) (domain_url string) {
-	//TODO: init the G_img_addr with the config read method
-	domain_url = "http://" + G_img_addr + "/" + url
+	domain_url = "http://" + config.GetMisconfig().GetImageAddr() + "/" + url
 
 	return domain_url
 }
@@ -82,11 +77,9 @@ func SendEmail(emailTo string, code string) error {
 			log.Info("SendEmail done")
 		}
 	}()
-	G_email_user := "test"
-	G_email_passwd := "test"
-	config := `{"username":"` + G_email_user + `","password":"` + G_email_passwd + `","host":"smtp.163.com","port":25}`
+	config := `{"username":"` + config.GetMisconfig().GetMailUser() + `","password":"` + config.GetMisconfig().GetMailPass() + `","host":"smtp.163.com","port":25}`
 	log.Info("SendEmail Config:", config)
-	temail := utils.NewEMail(config)
+	temail := NewEMail(config)
 	temail.To = []string{emailTo}
 	temail.From = "Ligthning"
 	temail.Subject = "Lightning Register Code"

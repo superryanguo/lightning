@@ -30,6 +30,7 @@ func (m defaultMysqlConfig) GetURL() string {
 func (m defaultMysqlConfig) GetPsw() string {
 	return m.Psw
 }
+
 func (m defaultMysqlConfig) GetDbName() string {
 	return m.DbName
 }
