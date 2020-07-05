@@ -85,7 +85,6 @@ func GetEmailCd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		"errmsg": rsp.Errmsg,
 	}
 
-	//设置返回格式
 	w.Header().Set("Content-Type", "application/json")
 
 	// encode and write the response as json
@@ -130,6 +129,7 @@ func GetSession(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		return
 	}
 	//如果cookie有值就发送到服务端
+	//TODO: we didn't send the session data to session mgr currently, need to correct later
 	rsp, err := smClient.GetSession(context.TODO(), &sm.Request{
 		SessionId: userlogin.Value,
 	})
@@ -155,6 +155,55 @@ func GetSession(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 }
 
+func DeleteSession(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	log.Info("DeleteSession-> Delete the session /api/v1.0/session")
+
+	userlogin, err := r.Cookie("userlogin")
+	if err != nil {
+		resp := map[string]interface{}{
+			"errno":  utils.RECODE_SESSIONERR,
+			"errmsg": utils.RecodeText(utils.RECODE_SESSIONERR),
+		}
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			http.Error(w, err.Error(), 503)
+			log.Info(err)
+			return
+		}
+		return
+	}
+
+	//TODO: we didn't send the session data to session mgr currently, need to correct later
+	rsp, err := smClient.DeleteSession(context.TODO(), &sm.Request{
+		SessionId: userlogin.Value,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	////读取cookie
+	//cookie, err := r.Cookie("userlogin")
+	////如果读取失败或者cookie中的value不存在则创建cookie
+	//if err != nil || "" == cookie.Value {
+		//return
+	//} else {
+		//cookie := http.Cookie{Name: "userlogin", Path: "/", MaxAge: 600}
+		//http.SetCookie(w, &cookie)
+	//}
+
+	response := map[string]interface{}{
+		"errno":  rsp.Errno,
+		"errmsg": rsp.Errmsg,
+	}
+	w.Header().Set("Content-type", "application/json")
+
+	// encode and write the response as json
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+}
 func PostReg(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	log.Info("PostReg-> /api/v1.0/users")
 

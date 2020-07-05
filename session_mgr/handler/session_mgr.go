@@ -44,6 +44,21 @@ func (e *Session_mgr) GetSession(ctx context.Context, req *session_mgr.Request, 
 
 	return nil
 }
+func (e *Session_mgr) DeleteSession(ctx context.Context, req *session_mgr.Request, rsp *session_mgr.Response) error {
+	log.Info("DeleteSession  /api/v1.0/session")
+
+	rsp.Errno = utils.RECODE_OK
+	rsp.Errmsg = utils.RecodeText(rsp.Errno)
+
+	err := cache.DelFromCache(req.SessionId)
+	if err != nil {
+		log.Infof("No sessionId=%d data in cache", req.SessionId)
+		rsp.Errno = utils.RECODE_DATAERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+	return nil
+}
 func (e *Session_mgr) SaveSession(ctx context.Context, ses *session_mgr.Session, rsp *session_mgr.Response) error {
 	log.Info("SaveSession url：api/v1.0/session")
 	return nil

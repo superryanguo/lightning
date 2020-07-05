@@ -47,8 +47,8 @@ func main() {
 	rou.GET("/api/v1.0/session", handler.GetSession)
 	////登录
 	rou.POST("/api/v1.0/sessions", handler.PostLogin)
-	////登出
-	//rou.DELETE("/api/v1.0/session", handler.DeleteSession)
+	//登出
+	rou.DELETE("/api/v1.0/session", handler.DeleteSession)
 	////获取用户信息
 	//rou.GET("/api/v1.0/user", handler.GetUserInfo)
 	//获取首页轮播图

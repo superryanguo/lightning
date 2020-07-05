@@ -5,6 +5,7 @@ package micro.super.lightning.service.session_mgr;
 service Session_mgr {
 	rpc GetSession(Request) returns (Response) {}
 	rpc SaveSession(Session) returns (Response) {}
+	rpc DeleteSession (Request) returns (Response) {}
 	rpc Stream(StreamingRequest) returns (stream StreamingResponse) {}
 	rpc PingPong(stream Ping) returns (stream Pong) {}
 }
