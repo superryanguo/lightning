@@ -3,6 +3,7 @@ package config
 // MysqlConfig mysql 配置 接口
 type MysqlConfig interface {
 	GetURL() string
+	GetName() string
 	GetPsw() string
 	GetDbName() string
 	GetEnabled() bool
@@ -14,6 +15,7 @@ type MysqlConfig interface {
 // defaultMysqlConfig mysql 配置
 type defaultMysqlConfig struct {
 	URL               string `json:"url"`
+	Name              string `json:"name"`
 	Psw               string `json:"psw"`
 	DbName            string `json:"dbname"`
 	Enable            bool   `json:"enabled"`
@@ -27,6 +29,9 @@ func (m defaultMysqlConfig) GetURL() string {
 	return m.URL
 }
 
+func (m defaultMysqlConfig) GetName() string {
+	return m.Name
+}
 func (m defaultMysqlConfig) GetPsw() string {
 	return m.Psw
 }

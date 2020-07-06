@@ -1,10 +1,13 @@
 package models
 
 import (
+	"fmt"
+
 	log "github.com/micro/go-micro/v2/logger"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
+	"github.com/superryanguo/lightning/basic/config"
 )
 
 type User struct {
@@ -22,7 +25,14 @@ type User struct {
 
 func Init() {
 	log.Info("Initing the models to create tables")
-	db, err := gorm.Open("mysql", "root:yourpassword@tcp(127.0.0.1:3306)/testorm?charset=utf8mb4&parseTime=True&loc=Local")
+	c := config.GetMysqlConfig()
+	config := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		config.GetMysqlConfig().GetName(),
+		config.GetMysqlConfig().GetPsw(),
+		config.GetMysqlConfig().GetURL(),
+		config.GetMysqlConfig().GetDbName())
+	db, err := gorm.Open("mysql", config)
+	//db, err := gorm.Open("mysql", "root:yourpassword@tcp(127.0.0.1:3306)/testorm?charset=utf8mb4&parseTime=True&loc=Local")
 
 	if err != nil {
 		panic("failed to connect database")
