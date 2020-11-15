@@ -194,12 +194,12 @@ func (this *House) To_one_house_desc() interface{} {
 
 func Init() {
 	log.Info("Initing the models to create tables")
-	c := config.GetMysqlConfig()
 	config := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		config.GetMysqlConfig().GetName(),
 		config.GetMysqlConfig().GetPsw(),
 		config.GetMysqlConfig().GetURL(),
 		config.GetMysqlConfig().GetDbName())
+	log.Debug("connect config=", config)
 	db, err := gorm.Open("mysql", config)
 	//db, err := gorm.Open("mysql", "root:yourpassword@tcp(127.0.0.1:3306)/testorm?charset=utf8mb4&parseTime=True&loc=Local")
 
