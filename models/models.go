@@ -211,4 +211,5 @@ func Init() {
 	// Migrate the schema
 	db.AutoMigrate(&User{}, &House{}, &OrderHouse{}, &Area{}, &Facility{}, &HouseImage{})
 
+	log.Info("Database tables init done")
 }
