@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/afocus/captcha"
-	"github.com/astaxie/beego/orm"
 	"github.com/garyburd/redigo/redis"
 	"github.com/google/uuid"
 	log "github.com/micro/go-micro/v2/logger"
@@ -68,12 +67,11 @@ func (e *User_srv) GetEmailCd(ctx context.Context, req *user_srv.MailRequest, rs
 	rsp.Errno = utils.RECODE_OK
 	rsp.Errmsg = utils.RecodeText(rsp.Errno)
 
-	o := orm.NewOrm()
-	o.Using("testorm")
-	user := models.User{Email: req.Email}
-	err := o.Read(&user, "email")
+	user := models.User{}
+	db := models.GetGorm()
+	err := db.Debug().Where(&models.User{Email: req.Email}).First(&user).Error
 	if err == nil {
-		log.Info("GetEmailCd->user already exist")
+		log.Debug("GetEmailCd->user already exist")
 		rsp.Errno = utils.RECODE_DBERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errmsg)
 		return nil
@@ -81,14 +79,14 @@ func (e *User_srv) GetEmailCd(ctx context.Context, req *user_srv.MailRequest, rs
 
 	value, err := cache.GetFromCache(req.Uuid)
 	if err != nil || value == "" {
-		log.Info("GetEmailCd->Cache query failure", value)
+		log.Debug("GetEmailCd->Cache query failure", value)
 		rsp.Errno = utils.RECODE_DBERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)
 		return nil
 	}
 	value_str, _ := redis.String(value, nil)
 	if req.Text != value_str {
-		log.Info("GetEmailCd->code mismatch")
+		log.Debug("GetEmailCd->code mismatch")
 		rsp.Errno = utils.RECODE_SMSERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)
 		return nil
@@ -101,7 +99,7 @@ func (e *User_srv) GetEmailCd(ctx context.Context, req *user_srv.MailRequest, rs
 	//发送邮箱验证码
 	err = utils.SendEmail(req.Email, code)
 	if err != nil {
-		log.Info("GetEmailCd->fail to send mail")
+		log.Debug("GetEmailCd->fail to send mail")
 		rsp.Errno = utils.RECODE_SERVERERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)
 		return nil
@@ -124,7 +122,7 @@ func (e *User_srv) PostReg(ctx context.Context, req *user_srv.Request, rsp *user
 
 	code_redis, err := cache.GetFromCache(req.Email)
 	if err != nil || code_redis == "" {
-		log.Info("PostReg->empty email code data in cache")
+		log.Debug("PostReg->empty email code data in cache")
 		rsp.Errno = utils.RECODE_DBERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)
 		err = nil
@@ -133,7 +131,7 @@ func (e *User_srv) PostReg(ctx context.Context, req *user_srv.Request, rsp *user
 	//get the email code
 	code, _ := redis.String(code_redis, nil)
 	if req.EmailCode != code {
-		log.Info("PostReg->wrong email code")
+		log.Debug("PostReg->wrong email code")
 		rsp.Errno = utils.RECODE_SMSERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)
 		//return nil
@@ -145,10 +143,10 @@ func (e *User_srv) PostReg(ctx context.Context, req *user_srv.Request, rsp *user
 	user.Password_hash = pwd_hash
 	user.Email = req.Email
 	log.Info("PostReg->generate the register user uid", user.Uid)
-	o := orm.NewOrm()
-	_, err = o.Insert(&user)
+	db := models.GetGorm()
+	err = db.Debug().Create(&user).Error
 	if err != nil {
-		log.Info("PostReg->fail to insert a user to db", err)
+		log.Debug("PostReg->fail to insert a user to db", user)
 		rsp.Errno = utils.RECODE_DBERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)
 		return nil
@@ -175,10 +173,13 @@ func (e *User_srv) PostLogin(ctx context.Context, req *user_srv.Request, rsp *us
 	rsp.Errmsg = utils.RecodeText(rsp.Errno)
 	//database query
 	var user models.User
-	o := orm.NewOrm()
-	o.Using("testorm")
-	qs := o.QueryTable("user")
-	err := qs.Filter("email", req.Email).One(&user)
+	db := models.GetGorm()
+	if req.Email == "" { //can't be empty or the gorm won't check the db
+		rsp.Errno = utils.RECODE_DBERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+	err := db.Debug().Where(&models.User{Email: req.Email}).First(&user).Error
 	if err != nil {
 		rsp.Errno = utils.RECODE_DBERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)

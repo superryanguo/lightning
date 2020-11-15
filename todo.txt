@@ -10,6 +10,7 @@
 10. add the function one by one, tidy the current(login-register-db-web) first!
 11. init with models.Init in each module looks not good, which maybe for the default orm, but not necessary, need a change.
 12. *plan to make all current function  adapt my app ready, then update the orm data model
+13. the gorm update --- done
 
    two kinds of datbase usage
 issues:

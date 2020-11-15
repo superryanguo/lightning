@@ -185,10 +185,10 @@ func DeleteSession(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	//cookie, err := r.Cookie("userlogin")
 	////如果读取失败或者cookie中的value不存在则创建cookie
 	//if err != nil || "" == cookie.Value {
-		//return
+	//return
 	//} else {
-		//cookie := http.Cookie{Name: "userlogin", Path: "/", MaxAge: 600}
-		//http.SetCookie(w, &cookie)
+	//cookie := http.Cookie{Name: "userlogin", Path: "/", MaxAge: 600}
+	//http.SetCookie(w, &cookie)
 	//}
 
 	response := map[string]interface{}{
@@ -214,7 +214,7 @@ func PostReg(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 
 	for key, value := range request {
-		log.Info(key, "-", value, "-", reflect.TypeOf(value))
+		log.Debug(key, "-", value, "-", reflect.TypeOf(value))
 	}
 
 	if request["email"] == "" || request["password"] == "" || request["email_code"] == "" {

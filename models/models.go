@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	log "github.com/micro/go-micro/v2/logger"
@@ -10,6 +11,12 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/superryanguo/lightning/basic/config"
 	"github.com/superryanguo/lightning/utils"
+)
+
+var (
+	inited bool
+	mygdb  *gorm.DB
+	m      sync.RWMutex
 )
 
 const (
@@ -193,7 +200,19 @@ func (this *House) To_one_house_desc() interface{} {
 }
 
 func Init() {
-	log.Info("Initing the models to create tables")
+	m.Lock()
+	defer m.Unlock()
+
+	var err error
+
+	if inited {
+		err = fmt.Errorf("[Init] models already init")
+		log.Error(err)
+		return
+	}
+
+	log.Info("Initing the models.........")
+	//db, err := gorm.Open("mysql", "root:yourpassword@tcp(127.0.0.1:3306)/testorm?charset=utf8mb4&parseTime=True&loc=Local")
 	config := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		config.GetMysqlConfig().GetName(),
 		config.GetMysqlConfig().GetPsw(),
@@ -201,15 +220,21 @@ func Init() {
 		config.GetMysqlConfig().GetDbName())
 	log.Debug("connect config=", config)
 	db, err := gorm.Open("mysql", config)
-	//db, err := gorm.Open("mysql", "root:yourpassword@tcp(127.0.0.1:3306)/testorm?charset=utf8mb4&parseTime=True&loc=Local")
 
 	if err != nil {
 		panic("failed to connect database")
 	}
-	defer db.Close()
+	//TODO: add a handling to close the db ,such as receive the exit singnal, then call db.close
+	//defer db.Close()
 
-	// Migrate the schema
+	//TODO: how to avoid the 2nd auto migrate from other micro-service
 	db.AutoMigrate(&User{}, &House{}, &OrderHouse{}, &Area{}, &Facility{}, &HouseImage{})
 
+	mygdb = db
+	inited = true
 	log.Info("Database tables init done")
+}
+
+func GetGorm() *gorm.DB {
+	return mygdb
 }
