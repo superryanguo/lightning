@@ -214,7 +214,11 @@ func PostReg(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 
 	for key, value := range request {
-		log.Debug(key, "-", value, "-", reflect.TypeOf(value))
+		if key != "password" {
+			log.Debug(key, ":", value, "[", reflect.TypeOf(value), "]")
+		} else {
+			log.Debug(key, ":", "******", "[", reflect.TypeOf(value), "]")
+		}
 	}
 
 	if request["email"] == "" || request["password"] == "" || request["email_code"] == "" {

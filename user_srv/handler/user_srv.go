@@ -21,7 +21,7 @@ import (
 type User_srv struct{}
 
 func (e *User_srv) GetImageCd(ctx context.Context, req *user_srv.ImageRequest, rsp *user_srv.ImageResponse) error {
-	log.Info("GetImageCd-> url:api/v1.0/imagecode/:uuid")
+	log.Info("GetImageCd-> url:api/v1.0/imagecode/:uuid=", req.Uuid)
 	cap := captcha.New()
 	if err := cap.SetFont("comic.ttf"); err != nil {
 		log.Info("GetImageCd->No font file")
@@ -70,8 +70,8 @@ func (e *User_srv) GetEmailCd(ctx context.Context, req *user_srv.MailRequest, rs
 	user := models.User{}
 	db := models.GetGorm()
 	err := db.Debug().Where(&models.User{Email: req.Email}).First(&user).Error
-	if err == nil {
-		log.Debug("GetEmailCd->user already exist")
+	if err != nil {
+		log.Debug("GetEmailCd->user already exist, Err:", err)
 		rsp.Errno = utils.RECODE_DBERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errmsg)
 		return nil
@@ -126,7 +126,7 @@ func (e *User_srv) PostReg(ctx context.Context, req *user_srv.Request, rsp *user
 		rsp.Errno = utils.RECODE_DBERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)
 		err = nil
-		//return nil
+		return nil
 	}
 	//get the email code
 	code, _ := redis.String(code_redis, nil)
@@ -134,6 +134,7 @@ func (e *User_srv) PostReg(ctx context.Context, req *user_srv.Request, rsp *user
 		log.Debug("PostReg->wrong email code")
 		rsp.Errno = utils.RECODE_SMSERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		//TODO: skip the check now, need open when lauch the whole program
 		//return nil
 	}
 	user := models.User{}

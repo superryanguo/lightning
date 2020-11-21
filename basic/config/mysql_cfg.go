@@ -7,6 +7,7 @@ type MysqlConfig interface {
 	GetPsw() string
 	GetDbName() string
 	GetEnabled() bool
+	GetMigrate() bool
 	GetMaxIdleConnection() int
 	GetMaxOpenConnection() int
 	GetConnMaxLifetime() int
@@ -19,6 +20,7 @@ type defaultMysqlConfig struct {
 	Psw               string `json:"psw"`
 	DbName            string `json:"dbname"`
 	Enable            bool   `json:"enabled"`
+	Migrate           bool   `json:"migrate"`
 	MaxIdleConnection int    `json:"maxIdleConnection"`
 	MaxOpenConnection int    `json:"maxOpenConnection"`
 	ConnMaxLifetime   int    `json:"connMaxLifetime"`
@@ -43,6 +45,10 @@ func (m defaultMysqlConfig) GetDbName() string {
 // Enabled 激活
 func (m defaultMysqlConfig) GetEnabled() bool {
 	return m.Enable
+}
+
+func (m defaultMysqlConfig) GetMigrate() bool {
+	return m.Migrate
 }
 
 // 闲置连接数

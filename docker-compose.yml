@@ -37,6 +37,33 @@ services:
     ports:
       - "3306:3306"
 
+  #website:
+    #restart: always
+    #container_name: "website"
+    #build: ./website
+    #links:
+      #- datamysql
+      #- dataredis
+    #depends_on:
+      #- datamysql
+      #- dataredis
+    #networks:
+      #- node-net
+
+  #user_srv:
+    #restart: always
+    #container_name: "user_srv"
+    #build: ./user_srv
+    #links:
+      #- datamysql
+      #- dataredis
+    #depends_on:
+      #- datamysql
+      #- dataredis
+      #- website
+    #networks:
+      #- node-net
+
 networks:
   node-net:
     name: node-net

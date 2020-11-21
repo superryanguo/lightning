@@ -199,6 +199,9 @@ func (this *House) To_one_house_desc() interface{} {
 	return house_desc
 }
 
+var area_data = "INSERT INTO `areas`(`name`) VALUES ('东城区'),('西城区'),('朝阳区'),('海淀区'),('昌平区'),('丰台区'),('房山区'),('通州区'),('顺义区'),('大兴区'),('怀柔区'),('平谷区'),('密云区'),('延庆区'),('石景山区')"
+var fac_data = "INSERT INTO `facilities`(`name`) VALUES('无线网络'),('热水淋浴'),('空调'),('暖气'),('允许吸烟'),('饮水设备'),('牙具'),('香皂'),('拖鞋'),('手纸'),('毛巾'),('沐浴露、洗发露'),('冰箱'),('洗衣机'),('电梯'),('允许做饭'),('允许带宠物'),('允许聚会'),('门禁系统'),('停车位'),('有线网络'),('电视'),('浴缸'),('吃鸡'),('打台球'),('游泳')"
+
 func Init() {
 	m.Lock()
 	defer m.Unlock()
@@ -213,13 +216,13 @@ func Init() {
 
 	log.Info("Initing the models.........")
 	//db, err := gorm.Open("mysql", "root:yourpassword@tcp(127.0.0.1:3306)/testorm?charset=utf8mb4&parseTime=True&loc=Local")
-	config := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+	orm_config := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		config.GetMysqlConfig().GetName(),
 		config.GetMysqlConfig().GetPsw(),
 		config.GetMysqlConfig().GetURL(),
 		config.GetMysqlConfig().GetDbName())
-	log.Debug("connect config=", config)
-	db, err := gorm.Open("mysql", config)
+	log.Debug("connect config=", orm_config)
+	db, err := gorm.Open("mysql", orm_config)
 
 	if err != nil {
 		panic("failed to connect database")
@@ -227,12 +230,43 @@ func Init() {
 	//TODO: add a handling to close the db ,such as receive the exit singnal, then call db.close
 	//defer db.Close()
 
-	//TODO: how to avoid the 2nd auto migrate from other micro-service
-	db.AutoMigrate(&User{}, &House{}, &OrderHouse{}, &Area{}, &Facility{}, &HouseImage{})
+	if config.GetMysqlConfig().GetMigrate() {
+		DataTableInit(db)
+	}
 
 	mygdb = db
 	inited = true
 	log.Info("Database tables init done")
+}
+func DataTableInit(db *gorm.DB) {
+	log.Debug("gorm automigrate database and init the areas data")
+
+	db.AutoMigrate(&User{}, &House{}, &OrderHouse{}, &Area{}, &Facility{}, &HouseImage{})
+
+	var areas []Area
+	result := db.Table("areas").Find(&areas)
+	if result.Error != nil {
+		log.Error(result.Error)
+	} else if result.RowsAffected == 0 {
+		//add the areas data if it's empty
+		if err := db.Debug().Raw(area_data).Scan(&areas).Error; err != nil {
+			log.Error(err)
+		} else {
+			log.Debug("AreasInsert:", result)
+		}
+	}
+
+	var facility []Facility
+	r := db.Table("facilities").Find(&facility)
+	if r.Error != nil {
+		log.Error(r.Error)
+	} else if r.RowsAffected == 0 {
+		if err := db.Debug().Raw(fac_data).Scan(&facility).Error; err != nil {
+			log.Error(err)
+		} else {
+			log.Debug("FacilityInsert:", result)
+		}
+	}
 }
 
 func GetGorm() *gorm.DB {
