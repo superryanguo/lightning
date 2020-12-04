@@ -9,16 +9,25 @@ import (
 	"time"
 
 	"github.com/afocus/captcha"
-	"github.com/garyburd/redigo/redis"
 	"github.com/google/uuid"
+	"github.com/micro/go-micro/v2/client"
 	log "github.com/micro/go-micro/v2/logger"
 	"github.com/superryanguo/lightning/basic/cache"
 	"github.com/superryanguo/lightning/models"
+	sm "github.com/superryanguo/lightning/session_mgr/proto/session_mgr"
 	user_srv "github.com/superryanguo/lightning/user_srv/proto/user_srv"
 	"github.com/superryanguo/lightning/utils"
 )
 
 type User_srv struct{}
+
+var (
+	smClient sm.SessionMgrService
+)
+
+func Init() {
+	smClient = sm.NewSessionMgrService("micro.super.lightning.service.session_mgr", client.DefaultClient)
+}
 
 func (e *User_srv) GetImageCd(ctx context.Context, req *user_srv.ImageRequest, rsp *user_srv.ImageResponse) error {
 	log.Info("GetImageCd-> url:api/v1.0/imagecode/:uuid=", req.Uuid)
@@ -70,22 +79,21 @@ func (e *User_srv) GetEmailCd(ctx context.Context, req *user_srv.MailRequest, rs
 	user := models.User{}
 	db := models.GetGorm()
 	err := db.Debug().Where(&models.User{Email: req.Email}).First(&user).Error
-	if err != nil {
+	if err == nil {
 		log.Debug("GetEmailCd->user already exist, Err:", err)
-		rsp.Errno = utils.RECODE_DBERR
+		rsp.Errno = utils.RECODE_DATAEXIST
 		rsp.Errmsg = utils.RecodeText(rsp.Errmsg)
 		return nil
 	}
 
 	value, err := cache.GetFromCache(req.Uuid)
-	if err != nil || value == "" {
-		log.Debug("GetEmailCd->Cache query failure", value)
+	if err != nil || value == nil {
+		log.Debug("GetEmailCd->Cache query failure")
 		rsp.Errno = utils.RECODE_DBERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)
 		return nil
 	}
-	value_str, _ := redis.String(value, nil)
-	if req.Text != value_str {
+	if req.Text != string(value) {
 		log.Debug("GetEmailCd->code mismatch")
 		rsp.Errno = utils.RECODE_SMSERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)
@@ -121,21 +129,19 @@ func (e *User_srv) PostReg(ctx context.Context, req *user_srv.Request, rsp *user
 	rsp.Errmsg = utils.RecodeText(rsp.Errno)
 
 	code_redis, err := cache.GetFromCache(req.Email)
-	if err != nil || code_redis == "" {
+	if err != nil || code_redis == nil {
 		log.Debug("PostReg->empty email code data in cache")
 		rsp.Errno = utils.RECODE_DBERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)
 		err = nil
 		return nil
 	}
-	//get the email code
-	code, _ := redis.String(code_redis, nil)
-	if req.EmailCode != code {
+	if req.EmailCode != string(code_redis) {
 		log.Debug("PostReg->wrong email code")
 		rsp.Errno = utils.RECODE_SMSERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)
-		//TODO: skip the check now, need open when lauch the whole program
-		//return nil
+		//TODO: can skip the check now, need open when lauch the whole program
+		return nil
 	}
 	user := models.User{}
 	user.Uid = uuid.New().String()
@@ -157,13 +163,22 @@ func (e *User_srv) PostReg(ctx context.Context, req *user_srv.Request, rsp *user
 	rsp.SessionId = sessionId
 	user.Password_hash = ""
 	userInfo, _ := json.Marshal(user)
-	err = cache.SaveToCache(sessionId, userInfo)
+
+	rp, err := smClient.SaveSession(context.TODO(), &sm.Session{
+		SessionId:   sessionId,
+		SessionData: userInfo,
+	})
+
 	if err != nil {
-		log.Debug("PostReg->redis save sessionid failure", err)
+		log.Debug("PostReg->smgr->redis save sessionid failure", err)
 		rsp.Errno = utils.RECODE_DBERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)
 		return nil
 	}
+
+	rsp.Errno = rp.Errno
+	rsp.Errmsg = rp.Errmsg
+
 	return nil
 }
 
@@ -194,29 +209,25 @@ func (e *User_srv) PostLogin(ctx context.Context, req *user_srv.Request, rsp *us
 		return nil
 	}
 
-	//bm, err := utils.GetRedisConnector()
-	//if err != nil {
-	//log.Debug("redis connection failure in postlogin", err)
-	//rsp.Errno = utils.RECODE_DBERR
-	//rsp.Errmsg = utils.RecodeText(rsp.Errno)
-	//return nil
-	//}
-
-	//TODO: should put this part into the session mgr
 	sessionId := utils.Sha256Encode(pwd_hash)
 	rsp.SessionId = sessionId
 	user.Password_hash = ""
 	userInfo, _ := json.Marshal(user)
-	//bm.Put(sessionId, userInfo, time.Second*600)
 
-	//ca := redis.GetRedis()
-	err = cache.SaveToCache(sessionId, userInfo)
+	rp, err := smClient.SaveSession(context.TODO(), &sm.Session{
+		SessionId:   sessionId,
+		SessionData: userInfo,
+	})
+
 	if err != nil {
-		log.Debug("PostLogin-> redis save sessionid failure in postlogin", err)
+		log.Debug("PostLogin->smgr->redis save sessionid failure", err)
 		rsp.Errno = utils.RECODE_DBERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)
 		return nil
 	}
+
+	rsp.Errno = rp.Errno
+	rsp.Errmsg = rp.Errmsg
 
 	return nil
 }

@@ -14,6 +14,7 @@ import (
 func main() {
 	basic.Init()
 	models.Init()
+	handler.Init() // I want to control the init
 	// New Service
 	service := micro.NewService(
 		micro.Name("micro.super.lightning.service.user_srv"),

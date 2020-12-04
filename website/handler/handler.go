@@ -13,6 +13,7 @@ import (
 	"github.com/micro/go-micro/v2/client"
 	log "github.com/micro/go-micro/v2/logger"
 	auth "github.com/superryanguo/lightning/auth/proto/auth"
+	"github.com/superryanguo/lightning/models"
 	sm "github.com/superryanguo/lightning/session_mgr/proto/session_mgr"
 	user "github.com/superryanguo/lightning/user_srv/proto/user_srv"
 	"github.com/superryanguo/lightning/utils"
@@ -129,7 +130,6 @@ func GetSession(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		return
 	}
 	//如果cookie有值就发送到服务端
-	//TODO: we didn't send the session data to session mgr currently, need to correct later
 	rsp, err := smClient.GetSession(context.TODO(), &sm.Request{
 		SessionId: userlogin.Value,
 	})
@@ -139,7 +139,14 @@ func GetSession(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 
 	data := make(map[string]string)
-	data["name"] = rsp.Data
+	u := models.User{}
+	err = json.Unmarshal([]byte(rsp.Data), &u)
+	if err != nil {
+		log.Info("Data unmarshal json error")
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	data["name"] = u.Name
 	//创建返回数据map
 	response := map[string]interface{}{
 		"errno":  rsp.Errno,
@@ -173,7 +180,6 @@ func DeleteSession(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 		return
 	}
 
-	//TODO: we didn't send the session data to session mgr currently, need to correct later
 	rsp, err := smClient.DeleteSession(context.TODO(), &sm.Request{
 		SessionId: userlogin.Value,
 	})

@@ -38,13 +38,15 @@ func DelFromCache(key string) (err error) {
 	return
 }
 
-func GetFromCache(key string) (string, error) {
+func GetFromCache(key string) ([]byte, error) {
 	if rc == nil {
 		log.Debug("redis.client un-init")
 	}
-	val, err := rc.Get(key).Result()
-	if err != nil {
-		return "", fmt.Errorf("[getFromCache]find no %s", err)
+	//val, err := rc.Get(key).Result()
+	//TODO: any bug here if the key is not exist?
+	val, err := rc.Get(key).Bytes()
+	if err != nil { //redis.Nil if key not exist
+		return nil, fmt.Errorf("[getFromCache]can't find key, err=%s", err)
 	}
 
 	return val, nil

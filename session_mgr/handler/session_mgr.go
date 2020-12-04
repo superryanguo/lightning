@@ -2,11 +2,9 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
 
 	log "github.com/micro/go-micro/v2/logger"
 	"github.com/superryanguo/lightning/basic/cache"
-	"github.com/superryanguo/lightning/models"
 	"github.com/superryanguo/lightning/utils"
 
 	session_mgr "github.com/superryanguo/lightning/session_mgr/proto/session_mgr"
@@ -32,15 +30,15 @@ func (e *Session_mgr) GetSession(ctx context.Context, req *session_mgr.Request, 
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)
 		return nil
 	}
-	user := models.User{}
-	err = json.Unmarshal([]byte(userInfo), &user)
-	if err != nil {
-		log.Info("Data unmarshal json error")
-		rsp.Errno = utils.RECODE_DATAERR
-		rsp.Errmsg = utils.RecodeText(rsp.Errno)
-		return nil
-	}
-	rsp.Data = user.Name
+	//user := models.User{}
+	//err = json.Unmarshal([]byte(userInfo), &user)
+	//if err != nil {
+	//log.Info("Data unmarshal json error")
+	//rsp.Errno = utils.RECODE_DATAERR
+	//rsp.Errmsg = utils.RecodeText(rsp.Errno)
+	//return nil
+	//}
+	rsp.Data = userInfo
 
 	return nil
 }
@@ -60,7 +58,18 @@ func (e *Session_mgr) DeleteSession(ctx context.Context, req *session_mgr.Reques
 	return nil
 }
 func (e *Session_mgr) SaveSession(ctx context.Context, ses *session_mgr.Session, rsp *session_mgr.Response) error {
-	log.Info("SaveSession url：api/v1.0/session")
+	log.Info("SaveSession /api/v1.0/session")
+
+	rsp.Errno = utils.RECODE_OK
+	rsp.Errmsg = utils.RecodeText(rsp.Errno)
+
+	err := cache.SaveToCache(ses.SessionId, ses.SessionData)
+	if err != nil {
+		log.Info("SaveSession failure:", err)
+		rsp.Errno = utils.RECODE_DATAERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
 	return nil
 }
 
