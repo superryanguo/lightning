@@ -46,6 +46,7 @@ type UserSrvService interface {
 	PostReg(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
 	GetImageCd(ctx context.Context, in *ImageRequest, opts ...client.CallOption) (*ImageResponse, error)
 	GetEmailCd(ctx context.Context, in *MailRequest, opts ...client.CallOption) (*Response, error)
+	GetArea(ctx context.Context, in *AreaRequest, opts ...client.CallOption) (*AreaResponse, error)
 	Stream(ctx context.Context, in *StreamingRequest, opts ...client.CallOption) (UserSrv_StreamService, error)
 	PingPong(ctx context.Context, opts ...client.CallOption) (UserSrv_PingPongService, error)
 }
@@ -95,6 +96,16 @@ func (c *userSrvService) GetImageCd(ctx context.Context, in *ImageRequest, opts 
 func (c *userSrvService) GetEmailCd(ctx context.Context, in *MailRequest, opts ...client.CallOption) (*Response, error) {
 	req := c.c.NewRequest(c.name, "UserSrv.GetEmailCd", in)
 	out := new(Response)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userSrvService) GetArea(ctx context.Context, in *AreaRequest, opts ...client.CallOption) (*AreaResponse, error) {
+	req := c.c.NewRequest(c.name, "UserSrv.GetArea", in)
+	out := new(AreaResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -209,6 +220,7 @@ type UserSrvHandler interface {
 	PostReg(context.Context, *Request, *Response) error
 	GetImageCd(context.Context, *ImageRequest, *ImageResponse) error
 	GetEmailCd(context.Context, *MailRequest, *Response) error
+	GetArea(context.Context, *AreaRequest, *AreaResponse) error
 	Stream(context.Context, *StreamingRequest, UserSrv_StreamStream) error
 	PingPong(context.Context, UserSrv_PingPongStream) error
 }
@@ -219,6 +231,7 @@ func RegisterUserSrvHandler(s server.Server, hdlr UserSrvHandler, opts ...server
 		PostReg(ctx context.Context, in *Request, out *Response) error
 		GetImageCd(ctx context.Context, in *ImageRequest, out *ImageResponse) error
 		GetEmailCd(ctx context.Context, in *MailRequest, out *Response) error
+		GetArea(ctx context.Context, in *AreaRequest, out *AreaResponse) error
 		Stream(ctx context.Context, stream server.Stream) error
 		PingPong(ctx context.Context, stream server.Stream) error
 	}
@@ -247,6 +260,10 @@ func (h *userSrvHandler) GetImageCd(ctx context.Context, in *ImageRequest, out *
 
 func (h *userSrvHandler) GetEmailCd(ctx context.Context, in *MailRequest, out *Response) error {
 	return h.UserSrvHandler.GetEmailCd(ctx, in, out)
+}
+
+func (h *userSrvHandler) GetArea(ctx context.Context, in *AreaRequest, out *AreaResponse) error {
+	return h.UserSrvHandler.GetArea(ctx, in, out)
 }
 
 func (h *userSrvHandler) Stream(ctx context.Context, stream server.Stream) error {

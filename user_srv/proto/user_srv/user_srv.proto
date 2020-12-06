@@ -7,6 +7,7 @@ service User_srv {
   rpc PostReg (Request) returns (Response) {}
   rpc GetImageCd (ImageRequest) returns (ImageResponse) {}
   rpc GetEmailCd (MailRequest) returns (Response) {}
+  rpc GetArea (AreaRequest) returns (AreaResponse) {}
   rpc Stream(StreamingRequest) returns (stream StreamingResponse) {}
   rpc PingPong(stream Ping) returns (stream Pong) {}
 }
@@ -41,6 +42,18 @@ message ImageResponse {
     Point Max = 6;
 }
 
+message AreaRequest {
+}
+
+message AreaResponse {
+    string Errno = 1;
+    string Errmsg = 2;
+    message Address {
+        int32 aid = 1;
+        string aname = 2;
+    }
+    repeated Address Data = 3;
+}
 message Request {
     string Email = 1;
     string Password = 2;
