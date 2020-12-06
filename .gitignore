@@ -10,6 +10,8 @@ data
 website/website
 auth/auth
 user_srv/user_srv
+payment/payment
+orders/orders
 db/*
 session_mgr/session_mgr
 
