@@ -71,7 +71,7 @@ $(document).ready(function () {
     }, "json");
 
     // 获取幻灯片要展示的房屋基本信息
-    $.get("/api/v1.0/lightning/index", function (resp) {
+    $.get("/api/v1.0/lightning/house/index", function (resp) {
         if ("0" == resp.errno) {
             $(".swiper-wrapper").html(template("swiper-houses-tmpl", {houses: resp.data}));
 
@@ -87,7 +87,7 @@ $(document).ready(function () {
     });
 
     // 获取城区信息
-    $.get("/api/v1.0/areas", function (resp) {
+    $.get("/api/v1.0/lightning/areas", function (resp) {
         if ("0" == resp.errno) {
             $(".area-list").html(template("area-list-tmpl", {areas: resp.data}));
 

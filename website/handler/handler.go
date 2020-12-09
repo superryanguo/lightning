@@ -59,6 +59,42 @@ func GetImageCd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 }
 
+func PostUserAuth(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+}
+func PutUserInfo(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+}
+func GetUserInfo(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+}
+func PostAvatar(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+}
+func GetArea(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	log.Info("GetArea-> url:api/v1.0/lightning/areas")
+
+	rsp, err := userClient.GetArea(context.TODO(), &user.AreaRequest{})
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	area_list := []models.Area{}
+	for _, value := range rsp.Data {
+		tmp := models.Area{ID: int(value.Aid), Name: value.Aname}
+		area_list = append(area_list, tmp)
+	}
+
+	log.Debug("area_list:", area_list)
+	response := map[string]interface{}{
+		"errno":  rsp.Errno,
+		"errmsg": rsp.Errmsg,
+		"data":   area_list,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+}
+
 func GetEmailCd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	log.Info("GetEmailCd-> url:api/v1.0/emailcode/:email")
 
@@ -96,7 +132,7 @@ func GetEmailCd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func GetIndex(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	log.Info("GetIndex-> html show api/v1.0/lightning/index")
+	log.Info("GetIndex-> html show api/v1.0/lightning/house/index")
 
 	response := map[string]interface{}{
 		"errno":  utils.RECODE_OK,

@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -23,7 +22,8 @@ func SaveToCache(key string, val []byte) (err error) {
 	log.Debug("SaveCache key=", key, " val=", string(val))
 
 	if err = rc.Set(key, val, ExpiredDate).Err(); err != nil {
-		return fmt.Errorf("[saveToCache] err:" + err.Error())
+		log.Debug("[saveToCache] err:", err.Error())
+		return err
 	}
 	return
 }
@@ -33,7 +33,8 @@ func DelFromCache(key string) (err error) {
 		log.Debug("redis.client un-init")
 	}
 	if err = rc.Del(key).Err(); err != nil {
-		return fmt.Errorf("[delFromCache] err:" + err.Error())
+		log.Debug("[delFromCache] err:", err.Error())
+		return err
 	}
 	return
 }
@@ -46,7 +47,8 @@ func GetFromCache(key string) ([]byte, error) {
 	//TODO: any bug here if the key is not exist?
 	val, err := rc.Get(key).Bytes()
 	if err != nil { //redis.Nil if key not exist
-		return nil, fmt.Errorf("[getFromCache]can't find key, err=%s", err)
+		log.Debug("[getFromCache]can't find key, err=", err.Error())
+		return nil, err
 	}
 
 	return val, nil

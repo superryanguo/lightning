@@ -41,26 +41,28 @@ func main() {
 	rou.NotFound = http.FileServer(http.Dir("html"))
 	rou.GET("/api/v1.0/imagecode/:uuid", handler.GetImageCd)
 	rou.GET("/api/v1.0/emailcode/:email", handler.GetEmailCd)
+	//获取地区数据
+	rou.GET("/api/v1.0/lightning/areas", handler.GetArea)
 	////注册
 	rou.POST("/api/v1.0/users", handler.PostReg)
 	//获取session
 	rou.GET("/api/v1.0/session", handler.GetSession)
 	////登录
-	rou.POST("/api/v1.0/sessions", handler.PostLogin)
+	rou.POST("/api/v1.0/userlogin", handler.PostLogin)
 	//登出
 	rou.DELETE("/api/v1.0/session", handler.DeleteSession)
-	////获取用户信息
-	//rou.GET("/api/v1.0/user", handler.GetUserInfo)
+	//获取用户信息
+	rou.GET("/api/v1.0/user", handler.GetUserInfo)
 	//获取首页轮播图
-	rou.GET("/api/v1.0/lightning/index", handler.GetIndex)
+	rou.GET("/api/v1.0/lightning/house/index", handler.GetIndex) //TODO:not sure the relatin with the v1.0/houses/ address
 	//上传用户头像
-	//rou.POST("/api/v1.0/user/avatar", handler.PostAvatar)
-	////修改用户名
-	//rou.PUT("/api/v1.0/user/name", handler.PutUserInfo)
-	////查看用户是否实名认证
-	//rou.GET("/api/v1.0/user/auth", handler.GetUserInfo)
-	////进行实名认证
-	//rou.POST("/api/v1.0/user/auth", handler.PostUserAuth)
+	rou.POST("/api/v1.0/user/avatar", handler.PostAvatar)
+	//修改用户名
+	rou.PUT("/api/v1.0/user/name", handler.PutUserInfo)
+	//查看用户是否实名认证
+	rou.GET("/api/v1.0/user/infoauth", handler.GetUserInfo)
+	//进行实名认证
+	rou.POST("/api/v1.0/user/infoauth", handler.PostUserAuth)
 
 	// register html handler
 	//service.Handle("/", http.FileServer(http.Dir("html")))

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/afocus/captcha"
+	"github.com/go-redis/redis"
 	"github.com/google/uuid"
 	"github.com/micro/go-micro/v2/client"
 	log "github.com/micro/go-micro/v2/logger"
@@ -29,8 +30,60 @@ func Init() {
 	smClient = sm.NewSessionMgrService("micro.super.lightning.service.session_mgr", client.DefaultClient)
 }
 
+func (e *User_srv) GetArea(ctx context.Context, req *user_srv.AreaRequest, rsp *user_srv.AreaResponse) error {
+	log.Info("GetArea-> url:/api/v1.0/lightning/areas")
+	rsp.Errno = utils.RECODE_OK
+	rsp.Errmsg = utils.RecodeText(rsp.Errno)
+
+	ca, err := cache.GetFromCache("areas_info")
+	if err != nil && err != redis.Nil {
+		log.Debug("GetArea->cache problem:", err)
+		rsp.Errno = utils.RECODE_DBERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+	if ca != nil {
+		areas_info := []map[string]interface{}{}
+		err = json.Unmarshal(ca, &areas_info)
+		for _, value := range areas_info {
+			area := user_srv.AreaResponse_Address{Aid: int32(value["area_id"].(float64)), Aname: value["area_name"].(string)}
+			rsp.Data = append(rsp.Data, &area)
+		}
+		log.Debug("GetArea->Areas:", rsp.Data)
+		return nil
+	}
+
+	var areas []models.Area
+	db := models.GetGorm()
+	err = db.Debug().Find(&areas).Error
+	if err != nil {
+		log.Info("GetArea can't find area data in DB, Err:", err)
+		rsp.Errno = utils.RECODE_DBERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+	if len(areas) == 0 {
+		rsp.Errno = utils.RECODE_NODATA
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+	area_json, _ := json.Marshal(areas)
+	err = cache.SaveToCache("areas_info", area_json)
+	if err != nil {
+		log.Debug("areas data can't save to cache", err)
+		//rsp.Errno = utils.RECODE_DBERR
+		//rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		//return nil
+		err = nil //TODO:this is not critical error, we can try again next time
+	}
+	for _, value := range areas {
+		area := user_srv.AreaResponse_Address{Aid: int32(value.ID), Aname: value.Name}
+		rsp.Data = append(rsp.Data, &area)
+	}
+	return nil
+}
 func (e *User_srv) GetImageCd(ctx context.Context, req *user_srv.ImageRequest, rsp *user_srv.ImageResponse) error {
-	log.Info("GetImageCd-> url:api/v1.0/imagecode/:uuid=", req.Uuid)
+	log.Info("GetImageCd-> url:/api/v1.0/imagecode/:uuid=", req.Uuid)
 	cap := captcha.New()
 	if err := cap.SetFont("comic.ttf"); err != nil {
 		log.Info("GetImageCd->No font file")
@@ -133,7 +186,7 @@ func (e *User_srv) PostReg(ctx context.Context, req *user_srv.Request, rsp *user
 		log.Debug("PostReg->empty email code data in cache")
 		rsp.Errno = utils.RECODE_DBERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)
-		err = nil
+		//err = nil
 		return nil
 	}
 	if req.EmailCode != string(code_redis) {

@@ -76,7 +76,7 @@ $(document).ready(function () {
 
 
     // 获取筛选条件中的城市区域信息
-    $.get("/api/v1.0/areas", function (data) {
+    $.get("/api/v1.0/lightning/areas", function (data) {
         if ("0" == data.errno) {
             var areaId = queryData["aid"];
             if (areaId) {

@@ -1,6 +1,6 @@
 $(document).ready(function () {
     // 对于发布房源，只有认证后的用户才可以，所以先判断用户的实名认证状态
-    $.get("/api/v1.0/user/auth", function (resp) {
+    $.get("/api/v1.0/user/infoauth", function (resp) {
         if ("4101" == resp.errno) {
             // 用户未登录
             location.href = "/login.html";

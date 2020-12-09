@@ -6,7 +6,7 @@ function getCookie(name) {
 $(document).ready(function () {
     // $('.popup_con').fadeIn('fast');
     // $('.popup_con').fadeOut('fast');
-    $.get("/api/v1.0/areas", function (resp) {
+    $.get("/api/v1.0/lightning/areas", function (resp) {
         if ("0" == resp.errno) {
             // // 表示查询到了数据,修改前端页面
             // for (var i=0; i<resp.data.length; i++) {
