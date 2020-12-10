@@ -8,8 +8,58 @@ service User_srv {
   rpc GetImageCd (ImageRequest) returns (ImageResponse) {}
   rpc GetEmailCd (MailRequest) returns (Response) {}
   rpc GetArea (AreaRequest) returns (AreaResponse) {}
+  rpc GetUserInfo (UserInfoRequest) returns (UserInfoResponse) {}
+  rpc PutUserInfo (PutRequest) returns (PutResponse) {}
+  rpc PostUserReal (RealNameRequest) returns (Response) {}
+  rpc PostAvatar (AvaRequest) returns (AvaResponse) {}
   rpc Stream(StreamingRequest) returns (stream StreamingResponse) {}
   rpc PingPong(stream Ping) returns (stream Pong) {}
+}
+
+message AvaRequest {
+    bytes Avatar = 1;
+    string SessionId = 2;
+    int64 Filesize = 3;
+    string Filename = 4;
+
+}
+
+message AvaResponse {
+    string Errno = 1;
+    string Errmsg = 2;
+    string Avatar_url = 3;
+}
+
+message RealNameRequest {
+    string SessionId = 1;
+    string Real_name = 2;
+    string Id_card = 3;
+}
+
+message PutRequest {
+    string SessionId = 1;
+    string Username = 2;
+}
+
+message PutResponse {
+    string Errno = 1;
+    string Errmsg = 2;
+    string Username = 3;
+}
+
+message UserInfoRequest {
+    string SessionId = 1;
+}
+
+message UserInfoResponse {
+    string Errno = 1;
+    string Errmsg = 2;
+    string User_id = 3;
+    string Name = 4;
+    string Email = 5;
+    string Real_name = 6;
+    string Id_card = 7;
+    string Avatar_url = 8;
 }
 
 message Message {
@@ -30,9 +80,7 @@ message ImageRequest {
 message ImageResponse {
     string Errno = 1;
     string Errmsg = 2;
-    //图片结构信息
     bytes Pix = 3;
-    //图片跨步
     int64 Stride = 4;
     message Point {
         int64 X = 1;

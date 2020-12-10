@@ -47,6 +47,10 @@ type UserSrvService interface {
 	GetImageCd(ctx context.Context, in *ImageRequest, opts ...client.CallOption) (*ImageResponse, error)
 	GetEmailCd(ctx context.Context, in *MailRequest, opts ...client.CallOption) (*Response, error)
 	GetArea(ctx context.Context, in *AreaRequest, opts ...client.CallOption) (*AreaResponse, error)
+	GetUserInfo(ctx context.Context, in *UserInfoRequest, opts ...client.CallOption) (*UserInfoResponse, error)
+	PutUserInfo(ctx context.Context, in *PutRequest, opts ...client.CallOption) (*PutResponse, error)
+	PostUserReal(ctx context.Context, in *RealNameRequest, opts ...client.CallOption) (*Response, error)
+	PostAvatar(ctx context.Context, in *AvaRequest, opts ...client.CallOption) (*AvaResponse, error)
 	Stream(ctx context.Context, in *StreamingRequest, opts ...client.CallOption) (UserSrv_StreamService, error)
 	PingPong(ctx context.Context, opts ...client.CallOption) (UserSrv_PingPongService, error)
 }
@@ -106,6 +110,46 @@ func (c *userSrvService) GetEmailCd(ctx context.Context, in *MailRequest, opts .
 func (c *userSrvService) GetArea(ctx context.Context, in *AreaRequest, opts ...client.CallOption) (*AreaResponse, error) {
 	req := c.c.NewRequest(c.name, "UserSrv.GetArea", in)
 	out := new(AreaResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userSrvService) GetUserInfo(ctx context.Context, in *UserInfoRequest, opts ...client.CallOption) (*UserInfoResponse, error) {
+	req := c.c.NewRequest(c.name, "UserSrv.GetUserInfo", in)
+	out := new(UserInfoResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userSrvService) PutUserInfo(ctx context.Context, in *PutRequest, opts ...client.CallOption) (*PutResponse, error) {
+	req := c.c.NewRequest(c.name, "UserSrv.PutUserInfo", in)
+	out := new(PutResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userSrvService) PostUserReal(ctx context.Context, in *RealNameRequest, opts ...client.CallOption) (*Response, error) {
+	req := c.c.NewRequest(c.name, "UserSrv.PostUserReal", in)
+	out := new(Response)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userSrvService) PostAvatar(ctx context.Context, in *AvaRequest, opts ...client.CallOption) (*AvaResponse, error) {
+	req := c.c.NewRequest(c.name, "UserSrv.PostAvatar", in)
+	out := new(AvaResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -221,6 +265,10 @@ type UserSrvHandler interface {
 	GetImageCd(context.Context, *ImageRequest, *ImageResponse) error
 	GetEmailCd(context.Context, *MailRequest, *Response) error
 	GetArea(context.Context, *AreaRequest, *AreaResponse) error
+	GetUserInfo(context.Context, *UserInfoRequest, *UserInfoResponse) error
+	PutUserInfo(context.Context, *PutRequest, *PutResponse) error
+	PostUserReal(context.Context, *RealNameRequest, *Response) error
+	PostAvatar(context.Context, *AvaRequest, *AvaResponse) error
 	Stream(context.Context, *StreamingRequest, UserSrv_StreamStream) error
 	PingPong(context.Context, UserSrv_PingPongStream) error
 }
@@ -232,6 +280,10 @@ func RegisterUserSrvHandler(s server.Server, hdlr UserSrvHandler, opts ...server
 		GetImageCd(ctx context.Context, in *ImageRequest, out *ImageResponse) error
 		GetEmailCd(ctx context.Context, in *MailRequest, out *Response) error
 		GetArea(ctx context.Context, in *AreaRequest, out *AreaResponse) error
+		GetUserInfo(ctx context.Context, in *UserInfoRequest, out *UserInfoResponse) error
+		PutUserInfo(ctx context.Context, in *PutRequest, out *PutResponse) error
+		PostUserReal(ctx context.Context, in *RealNameRequest, out *Response) error
+		PostAvatar(ctx context.Context, in *AvaRequest, out *AvaResponse) error
 		Stream(ctx context.Context, stream server.Stream) error
 		PingPong(ctx context.Context, stream server.Stream) error
 	}
@@ -264,6 +316,22 @@ func (h *userSrvHandler) GetEmailCd(ctx context.Context, in *MailRequest, out *R
 
 func (h *userSrvHandler) GetArea(ctx context.Context, in *AreaRequest, out *AreaResponse) error {
 	return h.UserSrvHandler.GetArea(ctx, in, out)
+}
+
+func (h *userSrvHandler) GetUserInfo(ctx context.Context, in *UserInfoRequest, out *UserInfoResponse) error {
+	return h.UserSrvHandler.GetUserInfo(ctx, in, out)
+}
+
+func (h *userSrvHandler) PutUserInfo(ctx context.Context, in *PutRequest, out *PutResponse) error {
+	return h.UserSrvHandler.PutUserInfo(ctx, in, out)
+}
+
+func (h *userSrvHandler) PostUserReal(ctx context.Context, in *RealNameRequest, out *Response) error {
+	return h.UserSrvHandler.PostUserReal(ctx, in, out)
+}
+
+func (h *userSrvHandler) PostAvatar(ctx context.Context, in *AvaRequest, out *AvaResponse) error {
+	return h.UserSrvHandler.PostAvatar(ctx, in, out)
 }
 
 func (h *userSrvHandler) Stream(ctx context.Context, stream server.Stream) error {
