@@ -15,5 +15,7 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/micro/cli/v2 v2.1.2
 	github.com/micro/go-micro/v2 v2.5.0
+	github.com/pkg/sftp v1.12.0
+	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	google.golang.org/protobuf v1.21.0
 )

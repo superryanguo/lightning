@@ -1,8 +1,17 @@
 package utils
 
 import (
+	"crypto/md5"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
+	"io/ioutil"
+	"net"
+	"path"
+	"time"
+
+	"github.com/pkg/sftp"
+	"golang.org/x/crypto/ssh"
 
 	log "github.com/micro/go-micro/v2/logger"
 	"github.com/superryanguo/lightning/basic/config"
@@ -88,4 +97,70 @@ func SendEmail(emailTo string, code string) error {
 	//err := temail.Send()
 	return nil //TODO: use right sending mail account
 	//return err
+}
+
+func Md5String(s string) string {
+	h := md5.New()
+	h.Write([]byte(s))
+
+	return hex.EncodeToString(h.Sum(nil))
+}
+func UploadByBuffer(filebuffer []byte, fileExt string) (string, error) {
+	//TODO: we do nothing currenlty to upload the avastart to picture server
+	log.Info("UploadAvastar do nothing currently!")
+	return "DummyFile", nil
+	var (
+		err        error
+		sftpClient *sftp.Client
+	)
+
+	sftpClient, err = connect()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer sftpClient.Close()
+
+	var remoteDir = "/home/vsftpd/sher/"
+	var fileName = Md5String(time.Now().String())
+	var remoteFileName = fileName + "." + fileExt
+	fmt.Println("remoteFileName:", remoteFileName)
+	dstFile, err := sftpClient.Create(path.Join(remoteDir, remoteFileName))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer dstFile.Close()
+	dstFile.Write(filebuffer)
+	return remoteFileName, nil
+}
+
+func connect() (*sftp.Client, error) {
+	var (
+		sftpClient *sftp.Client
+		err        error
+	)
+	pemBytes, err := ioutil.ReadFile("../conf/id_rsa")
+	if err != nil {
+		log.Fatal(err)
+	}
+	signer, err := ssh.ParsePrivateKey(pemBytes)
+	if err != nil {
+		log.Fatalf("parse key failed:%v", err)
+	}
+	config := &ssh.ClientConfig{
+		User: "root",
+		Auth: []ssh.AuthMethod{ssh.PublicKeys(signer)},
+		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+			return nil
+		},
+		Timeout: 30 * time.Second,
+	}
+	ssh_addr := "127.0.0.1" // ssh server ip
+	conn, err := ssh.Dial("tcp", ssh_addr+":22", config)
+	if err != nil {
+		log.Fatalf("dial failed:%v", err)
+	}
+	if sftpClient, err = sftp.NewClient(conn); err != nil {
+		return nil, err
+	}
+	return sftpClient, nil
 }

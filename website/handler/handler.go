@@ -60,13 +60,224 @@ func GetImageCd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func PostUserAuth(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	log.Info(" PutUserRealName->  api/v1.0/user/auth ")
+
+	var request map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	userlogin, err := r.Cookie("userlogin")
+	if err != nil {
+		resp := map[string]interface{}{
+			"errno":  utils.RECODE_SESSIONERR,
+			"errmsg": utils.RecodeText(utils.RECODE_SESSIONERR),
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			http.Error(w, err.Error(), 503)
+			log.Debug(err)
+			return
+		}
+		return
+	}
+
+	rsp, err := userClient.PostUserReal(context.TODO(), &user.RealNameRequest{
+		SessionId: userlogin.Value,
+		RealName:  request["real_name"].(string),
+		IdCard:    request["id_card"].(string),
+	})
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	response := map[string]interface{}{
+		"errno":  rsp.Errno,
+		"errmsg": rsp.Errmsg,
+	}
+
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, err.Error(), 501)
+		return
+	}
 }
+
 func PutUserInfo(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	log.Info("PutUserInfo-> url：api/v1.0/user/name")
+
+	var request map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	userlogin, err := r.Cookie("userlogin")
+	if err != nil {
+		resp := map[string]interface{}{
+			"errno":  utils.RECODE_SESSIONERR,
+			"errmsg": utils.RecodeText(utils.RECODE_SESSIONERR),
+		}
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			http.Error(w, err.Error(), 503)
+			log.Info(err)
+			return
+		}
+		return
+	}
+	rsp, err := userClient.PutUserInfo(context.TODO(), &user.PutRequest{
+		SessionId: userlogin.Value,
+		Username:  request["name"].(string),
+	})
+
+	if err != nil {
+		http.Error(w, err.Error(), 502)
+		return
+	}
+	data := make(map[string]interface{})
+	data["name"] = rsp.Username
+	resp := map[string]interface{}{
+		"errno":  rsp.Errno,
+		"errmsg": rsp.Errmsg,
+		"data":   data,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		http.Error(w, err.Error(), 503)
+		log.Info(err)
+		return
+	}
+	return
+}
+
+func PostAvatar(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	log.Info("PostAvatar->  /api/v1.0/user/avatar")
+
+	userlogin, err := r.Cookie("userlogin")
+	if err != nil || "" == userlogin.Value {
+		resp := map[string]interface{}{
+			"errno":  utils.RECODE_SESSIONERR,
+			"errmsg": utils.RecodeText(utils.RECODE_SESSIONERR),
+		}
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			http.Error(w, err.Error(), 503)
+			return
+		}
+		return
+	}
+	file, handler, err := r.FormFile("avatar")
+	if err != nil {
+		log.Debug("Avatar file error")
+		resp := map[string]interface{}{
+			"errno":  utils.RECODE_IOERR,
+			"errmsg": utils.RecodeText(utils.RECODE_IOERR),
+		}
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			http.Error(w, err.Error(), 503)
+			return
+		}
+		return
+	}
+
+	log.Info("FileSize:", handler.Size)
+	log.Info("FileName:", handler.Filename)
+
+	filebuffer := make([]byte, handler.Size)
+	_, err = file.Read(filebuffer)
+	if err != nil {
+		log.Debug("AvatarFile receive error")
+		resp := map[string]interface{}{
+			"errno":  utils.RECODE_IOERR,
+			"errmsg": utils.RecodeText(utils.RECODE_IOERR),
+		}
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			http.Error(w, err.Error(), 503)
+			return
+		}
+		return
+	}
+
+	rsp, err := userClient.PostAvatar(context.TODO(), &user.AvaRequest{
+		Avatar:    filebuffer,
+		SessionId: userlogin.Value,
+		Filename:  handler.Filename,
+		Filesize:  handler.Size,
+	})
+
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	data := make(map[string]interface{})
+	data["avatar_url"] = utils.AddDomain2Url(rsp.AvatarUrl)
+	response := map[string]interface{}{
+		"errno":  rsp.Errno,
+		"errmsg": rsp.Errmsg,
+		"data":   data,
+	}
+	w.Header().Set("Content-type", "application/json")
+
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
 }
 func GetUserInfo(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	log.Info("GetUserInfo-> url：api/v1.0/user")
+
+	userlogin, err := r.Cookie("userlogin")
+	if err != nil {
+		resp := map[string]interface{}{
+			"errno":  utils.RECODE_SESSIONERR,
+			"errmsg": utils.RecodeText(utils.RECODE_SESSIONERR),
+		}
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			http.Error(w, err.Error(), 503)
+			log.Info(err)
+			return
+		}
+		return
+	}
+	rsp, err := userClient.GetUserInfo(context.TODO(), &user.UserInfoRequest{
+		SessionId: userlogin.Value,
+	})
+
+	if err != nil {
+		http.Error(w, err.Error(), 502)
+		return
+	}
+
+	data := make(map[string]interface{})
+
+	data["user_id"] = rsp.UserId
+	data["name"] = rsp.Name
+	data["email"] = rsp.Email
+	data["real_name"] = rsp.RealName
+	data["id_card"] = rsp.IdCard
+	data["avatar_url"] = utils.AddDomain2Url(rsp.AvatarUrl)
+	resp := map[string]interface{}{
+		"errno":  rsp.Errno,
+		"errmsg": rsp.Errmsg,
+		"data":   data,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		http.Error(w, err.Error(), 503)
+		log.Info(err)
+		return
+	}
+	return
 }
-func PostAvatar(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-}
+
 func GetArea(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	log.Info("GetArea-> url:api/v1.0/lightning/areas")
 

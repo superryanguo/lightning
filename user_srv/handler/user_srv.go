@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"image/color"
 	"math/rand"
+	"path"
 	"strconv"
 	"time"
 
@@ -30,6 +31,171 @@ func Init() {
 	smClient = sm.NewSessionMgrService("micro.super.lightning.service.session_mgr", client.DefaultClient)
 }
 
+func (e *User_srv) PutUserInfo(ctx context.Context, req *user_srv.PutRequest, rsp *user_srv.PutResponse) error {
+	log.Info("PutUserInfo->  url：api/v1.0/user/name")
+
+	rsp.Errno = utils.RECODE_OK
+	rsp.Errmsg = utils.RecodeText(rsp.Errno)
+
+	userInfo_redis, err := cache.GetFromCache(req.SessionId)
+	if err != nil {
+		log.Debug("PutUserInfo->cache problem or empty data:", err)
+		rsp.Errno = utils.RECODE_DBERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+
+	userOld := models.User{}
+	json.Unmarshal(userInfo_redis, &userOld)
+	user := models.User{Uid: userOld.Uid, Name: req.Username}
+
+	db := models.GetGorm()
+	err = db.Debug().Model(&user).Update("name", req.Username).Error
+	if err != nil {
+		rsp.Errno = utils.RECODE_DBERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+
+	userOld.Name = req.Username
+	userInfo, _ := json.Marshal(userOld)
+	err = cache.SaveToCache(req.SessionId, userInfo)
+	if err != nil {
+		log.Debug("PutUserInfo->cache update username failure", err)
+		rsp.Errno = utils.RECODE_DBERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+
+	rsp.Username = user.Name
+	return nil
+}
+func (e *User_srv) PostUserReal(ctx context.Context, req *user_srv.RealNameRequest, rsp *user_srv.Response) error {
+	log.Info(" PostUserReal->  api/v1.0/user/auth ")
+
+	rsp.Errno = utils.RECODE_OK
+	rsp.Errmsg = utils.RecodeText(rsp.Errno)
+
+	userInfo_redis, err := cache.GetFromCache(req.SessionId)
+	if err != nil {
+		log.Debug("PostUserReal->cache problem or empty data:", err)
+		rsp.Errno = utils.RECODE_DBERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+
+	userOld := models.User{}
+	err = json.Unmarshal(userInfo_redis, &userOld)
+	if err != nil {
+		rsp.Errno = utils.RECODE_SERVERERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+	user := models.User{Uid: userOld.Uid}
+
+	db := models.GetGorm()
+
+	err = db.Debug().Model(&user).Updates(models.User{Real_name: req.RealName, Id_card: req.IdCard}).Error
+	if err != nil {
+		rsp.Errno = utils.RECODE_DBERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+
+	userOld.Real_name = req.RealName
+	userOld.Id_card = req.IdCard
+	userInfo, _ := json.Marshal(userOld)
+	err = cache.SaveToCache(req.SessionId, userInfo)
+	if err != nil {
+		log.Debug("PostUserReal->cache update failure", err)
+		rsp.Errno = utils.RECODE_DBERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+	return nil
+}
+func (e *User_srv) PostAvatar(ctx context.Context, req *user_srv.AvaRequest, rsp *user_srv.AvaResponse) error {
+	log.Info("PostAvatar->  /api/v1.0/avatar")
+
+	rsp.Errno = utils.RECODE_OK
+	rsp.Errmsg = utils.RecodeText(rsp.Errno)
+
+	log.Debug("Avatar:", len(req.Avatar), req.Filesize)
+	fileExt := path.Ext(req.Filename)
+	filename, err := utils.UploadByBuffer(req.Avatar, fileExt[1:])
+	if err != nil {
+		log.Debug("Errors when uploading to server")
+		rsp.Errno = utils.RECODE_IOERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+
+	userInfo_redis, err := cache.GetFromCache(req.SessionId)
+	if err != nil && err != redis.Nil {
+		log.Debug("PostAvatar->cache problem or no data in cache:", err)
+		rsp.Errno = utils.RECODE_DBERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+	userOld := models.User{}
+
+	err = json.Unmarshal(userInfo_redis, &userOld)
+	if err != nil {
+		rsp.Errno = utils.RECODE_SERVERERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+	user := models.User{Uid: userOld.Uid, Avatar_url: filename}
+	db := models.GetGorm()
+	err = db.Debug().Model(&user).Update("avatar_url", filename).Error
+	if err != nil {
+		rsp.Errno = utils.RECODE_DBERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+
+	userOld.Avatar_url = filename
+	userInfo, _ := json.Marshal(userOld)
+
+	err = cache.SaveToCache(req.SessionId, userInfo)
+	if err != nil {
+		log.Debug("PostAvatar->cache update failure", err)
+		rsp.Errno = utils.RECODE_DBERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+	rsp.AvatarUrl = filename
+	return nil
+}
+
+func (e *User_srv) GetUserInfo(ctx context.Context, req *user_srv.UserInfoRequest, rsp *user_srv.UserInfoResponse) error {
+	log.Info("GetUserInfo-> url：api/v1.0/user")
+
+	rsp.Errno = utils.RECODE_OK
+	rsp.Errmsg = utils.RecodeText(rsp.Errno)
+
+	userInfo_redis, err := cache.GetFromCache(req.SessionId)
+	if err != nil && err != redis.Nil {
+		log.Debug("GetArea->cache problem or no data session expired:", err)
+		rsp.Errno = utils.RECODE_DBERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+	user := models.User{}
+	err = json.Unmarshal(userInfo_redis, &user)
+	if err != nil {
+		rsp.Errno = utils.RECODE_SERVERERR
+		rsp.Errmsg = utils.RecodeText(rsp.Errno)
+		return nil
+	}
+	rsp.UserId = user.Uid
+	rsp.Email = user.Email
+	rsp.Name = user.Name
+	rsp.RealName = user.Real_name
+	rsp.IdCard = user.Id_card
+	rsp.AvatarUrl = user.Avatar_url
+	return nil
+}
 func (e *User_srv) GetArea(ctx context.Context, req *user_srv.AreaRequest, rsp *user_srv.AreaResponse) error {
 	log.Info("GetArea-> url:/api/v1.0/lightning/areas")
 	rsp.Errno = utils.RECODE_OK
