@@ -15,7 +15,7 @@ function getCookie(name) {
 
 $(document).ready(function () {
     // 查询用户的实名认证信息
-    $.get("/api/v1.0/user/auth", function (resp) {
+    $.get("/api/v1.0/user/infoauth", function (resp) {
         // 4101代表用户未登录
         if ("4101" == resp.errno) {
             location.href = "/login.html";
@@ -52,7 +52,7 @@ $(document).ready(function () {
 
         // 向后端发送请求
         $.ajax({
-            url: "/api/v1.0/user/auth",
+            url: "/api/v1.0/user/infoauth",
             type: "post",
             data: jsonData,
             contentType: "application/json",

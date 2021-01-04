@@ -60,7 +60,7 @@ func GetImageCd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func PostUserAuth(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	log.Info(" PutUserRealName->  api/v1.0/user/auth ")
+	log.Info(" PutUserRealName->  api/v1.0/user/infoauth ")
 
 	var request map[string]interface{}
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -231,7 +231,7 @@ func PostAvatar(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 }
 func GetUserInfo(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	log.Info("GetUserInfo-> url：api/v1.0/user")
+	log.Info("GetUserInfo-> url：api/v1.0/user/Or/infoauth")
 
 	userlogin, err := r.Cookie("userlogin")
 	if err != nil {

@@ -169,7 +169,7 @@ func (e *User_srv) PostAvatar(ctx context.Context, req *user_srv.AvaRequest, rsp
 }
 
 func (e *User_srv) GetUserInfo(ctx context.Context, req *user_srv.UserInfoRequest, rsp *user_srv.UserInfoResponse) error {
-	log.Info("GetUserInfo-> url：api/v1.0/user")
+	log.Info("GetUserInfo-> url：api/v1.0/user/Or/infoauth")
 
 	rsp.Errno = utils.RECODE_OK
 	rsp.Errmsg = utils.RecodeText(rsp.Errno)
