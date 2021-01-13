@@ -1,15 +1,17 @@
 syntax = "proto3";
 
-package mu.micro.book.srv.auth;
+package micro.super.lightning.service.auth;
 
-service Service {
-    rpc MakeAccessToken (Request) returns (Response) {
-    }
-    rpc DelUserAccessToken (Request) returns (Response) {
-    }
+service Auth {
+  rpc MakeAccessToken (Request) returns (Response) {}
+  rpc DelUserAccessToken (Request) returns (Response) {}
+  rpc GetCachedAccessToken (Request) returns (Response) {}
+	rpc Stream(StreamingRequest) returns (stream StreamingResponse) {}
+	rpc PingPong(stream Ping) returns (stream Pong) {}
+}
 
-    rpc GetCachedAccessToken (Request) returns (Response) {
-    }
+message Message {
+	string say = 1;
 }
 
 message Error {
@@ -27,4 +29,20 @@ message Response {
     bool success = 1;
     Error error = 2;
     string token = 3;
+}
+
+message StreamingRequest {
+	int64 count = 1;
+}
+
+message StreamingResponse {
+	int64 count = 1;
+}
+
+message Ping {
+	int64 stroke = 1;
+}
+
+message Pong {
+	int64 stroke = 1;
 }

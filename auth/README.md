@@ -1,29 +1,55 @@
-# auth认证服务
+# Auth Service
 
-## 使用
+This is the Auth service
 
-### 运行
+Generated with
 
-```bash
-go run main.go
+```
+micro new auth --namespace=micro.super.lightning --type=service
 ```
 
-### 编译打包
+## Getting Started
 
-打包
+- [Configuration](#configuration)
+- [Dependencies](#dependencies)
+- [Usage](#usage)
+
+## Configuration
+
+- FQDN: micro.super.lightning.service.auth
+- Type: service
+- Alias: auth
+
+## Dependencies
+
+Micro services depend on service discovery. The default is multicast DNS, a zeroconf system.
+
+In the event you need a resilient multi-host setup we recommend etcd.
+
+```
+# install etcd
+brew install etcd
+
+# run etcd
+etcd
+```
+
+## Usage
+
+A Makefile is included for convenience
+
+Build the binary
 
 ```
 make build
 ```
 
-运行二进制文件
-
+Run the service
 ```
-./auth-srv
+./auth-service
 ```
 
-打包成docker镜像
-
+Build a docker image
 ```
 make docker
 ```
