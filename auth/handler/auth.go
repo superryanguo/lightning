@@ -2,17 +2,67 @@ package handler
 
 import (
 	"context"
+	"strconv"
 
 	log "github.com/micro/go-micro/v2/logger"
 
+	"github.com/superryanguo/lightning/auth/jwtoken"
 	auth "github.com/superryanguo/lightning/auth/proto/auth"
 )
 
 type Auth struct{}
 
-// Call is a single request handler called via client.Call or the generated client code
-func (e *Auth) Auth(ctx context.Context, req *auth.Request, rsp *auth.Response) error {
-	log.Info("Received Auth.Call request")
+func Init() {
+}
+
+func (e *Auth) MakeAccessToken(ctx context.Context, req *auth.Request, rsp *auth.Response) error {
+	log.Debug("[MakeAccessToken] receive the create req")
+
+	token, err := jwtoken.MakeAccessToken(&jwtoken.Subject{
+		ID:   strconv.FormatInt(req.UserId, 10),
+		Name: req.UserName,
+	})
+	if err != nil {
+		rsp.Error = &auth.Error{
+			Detail: err.Error(),
+		}
+
+		log.Errorf("[MakeAccessToken] fail err：%s", err)
+		return err
+	}
+
+	rsp.Token = token
+	return nil
+}
+func (s *Auth) DelUserAccessToken(ctx context.Context, req *auth.Request, rsp *auth.Response) error {
+	log.Debug("[DelUserAccessToken]...")
+	err := jwtoken.DelUserAccessToken(req.Token)
+	if err != nil {
+		rsp.Error = &auth.Error{
+			Detail: err.Error(),
+		}
+
+		log.Errorf("[DelUserAccessToken] fail err：%s", err)
+		return err
+	}
+	return nil
+}
+
+func (s *Auth) GetCachedAccessToken(ctx context.Context, req *auth.Request, rsp *auth.Response) error {
+	log.Debugf("[GetCachedAccessToken] token:%d", req.UserId)
+	token, err := jwtoken.GetCachedAccessToken(&jwtoken.Subject{
+		ID: strconv.FormatInt(req.UserId, 10),
+	})
+	if err != nil {
+		rsp.Error = &auth.Error{
+			Detail: err.Error(),
+		}
+
+		log.Errorf("[GetCachedAccessToken] fail err：%s", err)
+		return err
+	}
+
+	rsp.Token = token
 	return nil
 }
 

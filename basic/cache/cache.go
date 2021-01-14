@@ -28,6 +28,19 @@ func SaveToCache(key string, val []byte) (err error) {
 	return
 }
 
+func SaveToCacheDate(key string, val []byte, date time.Duration) (err error) {
+	if rc == nil {
+		log.Debug("redis.client un-init")
+	}
+	log.Debug("SaveCache key=", key, " val=", string(val))
+
+	if err = rc.Set(key, val, date).Err(); err != nil {
+		log.Debug("[saveToCache] err:", err.Error())
+		return err
+	}
+	return
+}
+
 func DelFromCache(key string) (err error) {
 	if rc == nil {
 		log.Debug("redis.client un-init")
