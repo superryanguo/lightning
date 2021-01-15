@@ -12,7 +12,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/micro/go-micro/v2/client"
 	log "github.com/micro/go-micro/v2/logger"
-	auth "github.com/superryanguo/lightning/auth/proto/auth"
 	"github.com/superryanguo/lightning/models"
 	sm "github.com/superryanguo/lightning/session_mgr/proto/session_mgr"
 	user "github.com/superryanguo/lightning/user_srv/proto/user_srv"
@@ -22,13 +21,11 @@ import (
 var (
 	smClient   sm.SessionMgrService
 	userClient user.UserSrvService
-	authClient auth.Service
 )
 
 func Init() {
 	smClient = sm.NewSessionMgrService("micro.super.lightning.service.session_mgr", client.DefaultClient)
 	userClient = user.NewUserSrvService("micro.super.lightning.service.user_srv", client.DefaultClient)
-	authClient = auth.NewService("micro.super.lightning.service.auth", client.DefaultClient)
 }
 
 func GetImageCd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

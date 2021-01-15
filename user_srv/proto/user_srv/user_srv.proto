@@ -112,6 +112,7 @@ message Response {
     string Errno = 1;
     string Errmsg = 2;
     string SessionId = 3;
+    string Token = 4;
 }
 
 message StreamingRequest {
