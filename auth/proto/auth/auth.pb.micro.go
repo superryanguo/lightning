@@ -43,6 +43,7 @@ func NewAuthEndpoints() []*api.Endpoint {
 
 type AuthService interface {
 	MakeAccessToken(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
+	AuthAccessToken(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
 	DelUserAccessToken(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
 	GetCachedAccessToken(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
 	Stream(ctx context.Context, in *StreamingRequest, opts ...client.CallOption) (Auth_StreamService, error)
@@ -63,6 +64,16 @@ func NewAuthService(name string, c client.Client) AuthService {
 
 func (c *authService) MakeAccessToken(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error) {
 	req := c.c.NewRequest(c.name, "Auth.MakeAccessToken", in)
+	out := new(Response)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authService) AuthAccessToken(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error) {
+	req := c.c.NewRequest(c.name, "Auth.AuthAccessToken", in)
 	out := new(Response)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -195,6 +206,7 @@ func (x *authServicePingPong) Recv() (*Pong, error) {
 
 type AuthHandler interface {
 	MakeAccessToken(context.Context, *Request, *Response) error
+	AuthAccessToken(context.Context, *Request, *Response) error
 	DelUserAccessToken(context.Context, *Request, *Response) error
 	GetCachedAccessToken(context.Context, *Request, *Response) error
 	Stream(context.Context, *StreamingRequest, Auth_StreamStream) error
@@ -204,6 +216,7 @@ type AuthHandler interface {
 func RegisterAuthHandler(s server.Server, hdlr AuthHandler, opts ...server.HandlerOption) error {
 	type auth interface {
 		MakeAccessToken(ctx context.Context, in *Request, out *Response) error
+		AuthAccessToken(ctx context.Context, in *Request, out *Response) error
 		DelUserAccessToken(ctx context.Context, in *Request, out *Response) error
 		GetCachedAccessToken(ctx context.Context, in *Request, out *Response) error
 		Stream(ctx context.Context, stream server.Stream) error
@@ -222,6 +235,10 @@ type authHandler struct {
 
 func (h *authHandler) MakeAccessToken(ctx context.Context, in *Request, out *Response) error {
 	return h.AuthHandler.MakeAccessToken(ctx, in, out)
+}
+
+func (h *authHandler) AuthAccessToken(ctx context.Context, in *Request, out *Response) error {
+	return h.AuthHandler.AuthAccessToken(ctx, in, out)
 }
 
 func (h *authHandler) DelUserAccessToken(ctx context.Context, in *Request, out *Response) error {
