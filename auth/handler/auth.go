@@ -34,11 +34,19 @@ func (e *Auth) MakeAccessToken(ctx context.Context, req *auth.Request, rsp *auth
 	rsp.Token = token
 	return nil
 }
+
 func (e *Auth) AuthAccessToken(ctx context.Context, req *auth.Request, rsp *auth.Response) error {
 	log.Debug("[AuthAccessToken] receive the auth req")
 
+	rsp.Success = false
+	_, err := jwtoken.ParseToken(req.Token)
+	if err == nil {
+		rsp.Success = true
+	}
+
 	return nil
 }
+
 func (s *Auth) DelUserAccessToken(ctx context.Context, req *auth.Request, rsp *auth.Response) error {
 	log.Debug("[DelUserAccessToken]...")
 	err := jwtoken.DelUserAccessToken(req.Token)

@@ -54,7 +54,7 @@ func GetCachedAccessToken(subject *Subject) (ret string, err error) {
 }
 
 func DelUserAccessToken(tk string) (err error) {
-	claims, err := parseToken(tk)
+	claims, err := ParseToken(tk)
 	if err != nil {
 		return fmt.Errorf("[DelUserAccessToken] wrong token，err: %s", err)
 	}
@@ -78,4 +78,58 @@ func DelUserAccessToken(tk string) (err error) {
 	}
 
 	return
+}
+func createTokenClaims(subject *Subject) (m *jwt.StandardClaims, err error) {
+	now := time.Now()
+	m = &jwt.StandardClaims{
+		ExpiresAt: now.Add(tokenExpiredDate).Unix(),
+		NotBefore: now.Unix(),
+		Id:        subject.ID,
+		IssuedAt:  now.Unix(),
+		Issuer:    "superryan.guo.lightning",
+		Subject:   subject.ID,
+	}
+
+	return
+}
+func ParseToken(tk string) (c *jwt.StandardClaims, err error) {
+	token, err := jwt.Parse(tk, func(token *jwt.Token) (interface{}, error) {
+		_, ok := token.Method.(*jwt.SigningMethodHMAC)
+		if !ok {
+			return nil, fmt.Errorf("illegal token format: %v", token.Header["alg"])
+		}
+		return []byte(config.GetJwtConfig().GetSecretKey()), nil
+	})
+
+	if err != nil {
+		switch e := err.(type) {
+		case *jwt.ValidationError:
+			switch e.Errors {
+			case jwt.ValidationErrorExpired:
+				return nil, fmt.Errorf("[ParseToken] expired token, err:%s", err)
+			default:
+				break
+			}
+			break
+		default:
+			break
+		}
+
+		return nil, fmt.Errorf("[ParseToken] illegal token, err:%s", err)
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return nil, fmt.Errorf("[ParseToken] illegal token")
+	}
+
+	return mapClaimToJwClaim(claims), nil
+}
+
+func mapClaimToJwClaim(claims jwt.MapClaims) *jwt.StandardClaims {
+	jC := &jwt.StandardClaims{
+		Subject: claims["sub"].(string),
+	}
+
+	return jC
 }

@@ -7,7 +7,6 @@ import (
 	"github.com/superryanguo/lightning/auth/handler"
 	"github.com/superryanguo/lightning/auth/subscriber"
 	"github.com/superryanguo/lightning/basic"
-	"github.com/superryanguo/lightning/models"
 
 	auth "github.com/superryanguo/lightning/auth/proto/auth"
 )
@@ -23,7 +22,7 @@ func main() {
 	// Initialise service
 	service.Init(
 		micro.Action(func(c *cli.Context) error {
-			models.Init()
+			//models.Init()
 			handler.Init()
 			return nil
 		}),
