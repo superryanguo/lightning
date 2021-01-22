@@ -7,11 +7,13 @@ import (
 	"image/png"
 	"net/http"
 	"reflect"
+	"time"
 
 	"github.com/afocus/captcha"
 	"github.com/julienschmidt/httprouter"
 	"github.com/micro/go-micro/v2/client"
 	log "github.com/micro/go-micro/v2/logger"
+	auth "github.com/superryanguo/lightning/auth/proto/auth"
 	"github.com/superryanguo/lightning/models"
 	sm "github.com/superryanguo/lightning/session_mgr/proto/session_mgr"
 	user "github.com/superryanguo/lightning/user_srv/proto/user_srv"
@@ -21,11 +23,13 @@ import (
 var (
 	smClient   sm.SessionMgrService
 	userClient user.UserSrvService
+	auClient   auth.AuthService
 )
 
 func Init() {
 	smClient = sm.NewSessionMgrService("micro.super.lightning.service.session_mgr", client.DefaultClient)
 	userClient = user.NewUserSrvService("micro.super.lightning.service.user_srv", client.DefaultClient)
+	auClient = auth.NewAuthService("micro.super.lightning.service.auth", client.DefaultClient)
 }
 
 func GetImageCd(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -431,15 +435,37 @@ func DeleteSession(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 		http.Error(w, err.Error(), 500)
 		return
 	}
-	////读取cookie
-	//cookie, err := r.Cookie("userlogin")
-	////如果读取失败或者cookie中的value不存在则创建cookie
-	//if err != nil || "" == cookie.Value {
-	//return
-	//} else {
-	//cookie := http.Cookie{Name: "userlogin", Path: "/", MaxAge: 600}
-	//http.SetCookie(w, &cookie)
-	//}
+
+	cookie := http.Cookie{Name: "userlogin", Value: "", Path: "/", Expires: time.Now().Add(0 * time.Second), MaxAge: 0}
+	http.SetCookie(w, &cookie)
+
+	tokenCookie, err := r.Cookie("remember-me-jwtoken")
+	if err != nil {
+		log.Info("token-get failure in DeleteSession")
+		resp := map[string]interface{}{
+			"errno":  utils.RECODE_SESSIONERR,
+			"errmsg": utils.RecodeText(utils.RECODE_SESSIONERR),
+		}
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			http.Error(w, err.Error(), 503)
+			log.Info(err)
+			return
+		}
+		return
+	}
+
+	_, err = auClient.DelUserAccessToken(context.TODO(), &auth.Request{
+		Token: tokenCookie.Value,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	// clear cookie
+	cookie = http.Cookie{Name: "remember-me-jwtoken", Value: "", Path: "/", Expires: time.Now().Add(0 * time.Second), MaxAge: 0}
+	http.SetCookie(w, &cookie)
 
 	response := map[string]interface{}{
 		"errno":  rsp.Errno,
@@ -454,6 +480,7 @@ func DeleteSession(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	}
 
 }
+
 func PostReg(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	log.Info("PostReg-> /api/v1.0/users")
 
@@ -503,14 +530,19 @@ func PostReg(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		"errmsg": rsp.Errmsg,
 	}
 
-	//读取cookie
 	cookie, err := r.Cookie("userlogin")
-	//如果读取失败或者cookie中的value不存在则创建cookie
 	if err != nil || "" == cookie.Value {
 		cookie := http.Cookie{Name: "userlogin", Value: rsp.SessionId, Path: "/", MaxAge: 600}
 		http.SetCookie(w, &cookie)
 	}
 
+	//for jwt
+	if len(rsp.Token) > 10 {
+		//w.Header().Add("set-cookie", "application/json; charset=utf-8")
+		expire := time.Now().Add(30 * time.Minute)
+		cookie := http.Cookie{Name: "remember-me-jwtoken", Value: rsp.Token, Path: "/", Expires: expire, MaxAge: 90000}
+		http.SetCookie(w, &cookie)
+	}
 	// encode and write the response as json
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		http.Error(w, err.Error(), 500)
@@ -557,11 +589,16 @@ func PostLogin(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		return
 	}
 
-	//读取cookie
 	cookie, err := r.Cookie("userlogin")
-	//如果读取失败或者cookie中的value不存在则创建cookie
 	if err != nil || "" == cookie.Value {
 		cookie := http.Cookie{Name: "userlogin", Value: rsp.SessionId, Path: "/", MaxAge: 600}
+		http.SetCookie(w, &cookie)
+	}
+	//for jwt
+	if len(rsp.Token) > 10 {
+		//w.Header().Add("set-cookie", "application/json; charset=utf-8")
+		expire := time.Now().Add(30 * time.Minute)
+		cookie := http.Cookie{Name: "remember-me-jwtoken", Value: rsp.Token, Path: "/", Expires: expire, MaxAge: 90000}
 		http.SetCookie(w, &cookie)
 	}
 

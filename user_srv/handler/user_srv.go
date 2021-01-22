@@ -14,6 +14,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/micro/go-micro/v2/client"
 	log "github.com/micro/go-micro/v2/logger"
+	auth "github.com/superryanguo/lightning/auth/proto/auth"
 	"github.com/superryanguo/lightning/basic/cache"
 	"github.com/superryanguo/lightning/models"
 	sm "github.com/superryanguo/lightning/session_mgr/proto/session_mgr"
@@ -25,10 +26,12 @@ type User_srv struct{}
 
 var (
 	smClient sm.SessionMgrService
+	auClient auth.AuthService
 )
 
 func Init() {
 	smClient = sm.NewSessionMgrService("micro.super.lightning.service.session_mgr", client.DefaultClient)
+	auClient = auth.NewAuthService("micro.super.lightning.service.auth", client.DefaultClient)
 }
 
 func (e *User_srv) PutUserInfo(ctx context.Context, req *user_srv.PutRequest, rsp *user_srv.PutResponse) error {
@@ -395,6 +398,22 @@ func (e *User_srv) PostReg(ctx context.Context, req *user_srv.Request, rsp *user
 		return nil
 	}
 
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	uid := r.Intn(999999999) + 1001
+	log.Info("PostReg->uid=", uid)
+	rsp2, err := auClient.MakeAccessToken(context.TODO(), &auth.Request{
+		UserId:   int64(uid),
+		UserName: user.Name,
+	})
+
+	//currently we ignore the jwt creation error because we just take
+	//jwt as a plus method for session
+	if err == nil {
+		rsp.Token = rsp2.Token
+	} else {
+		log.Errorf("auClient.MakeAccessToken Failure err：%s", err)
+	}
+
 	rsp.Errno = rp.Errno
 	rsp.Errmsg = rp.Errmsg
 
@@ -443,6 +462,22 @@ func (e *User_srv) PostLogin(ctx context.Context, req *user_srv.Request, rsp *us
 		rsp.Errno = utils.RECODE_DBERR
 		rsp.Errmsg = utils.RecodeText(rsp.Errno)
 		return nil
+	}
+
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	uid := r.Intn(999999999) + 1001
+	log.Info("PostLogin->uid=", uid)
+	rsp2, err := auClient.MakeAccessToken(context.TODO(), &auth.Request{
+		UserId:   int64(uid),
+		UserName: user.Name,
+	})
+
+	//currently we ignore the jwt creation error because we just take
+	//jwt as a plus method for session
+	if err == nil {
+		rsp.Token = rsp2.Token
+	} else {
+		log.Errorf("auClient.MakeAccessToken Failure err：%s", err)
 	}
 
 	rsp.Errno = rp.Errno
